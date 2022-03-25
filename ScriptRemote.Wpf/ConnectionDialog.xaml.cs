@@ -138,6 +138,10 @@ namespace ScriptRemote.Wpf
 							if (rawUsername != null)
 								settings.Username = rawUsername;
 
+							string rawPassword = settingsElement.XPathSelectElement("Password")?.Value;
+							if (rawPassword != null)
+								settings.Password = rawPassword;
+
 							string rawKeyFilePath = settingsElement.XPathSelectElement("KeyFilePath")?.Value;
 							if (rawKeyFilePath != null)
 								settings.KeyFilePath = rawKeyFilePath;
@@ -176,6 +180,7 @@ namespace ScriptRemote.Wpf
 						connection.Add(new XElement(XName.Get("ServerAddress"), settings.ServerAddress));
 						connection.Add(new XElement(XName.Get("ServerPort"), settings.ServerPort));
 						connection.Add(new XElement(XName.Get("Username"), settings.Username));
+						connection.Add(new XElement(XName.Get("Password"), settings.Password));
 						connection.Add(new XElement(XName.Get("KeyFilePath"), settings.KeyFilePath));
 					}
 
@@ -246,7 +251,8 @@ namespace ScriptRemote.Wpf
 				serverAddress.Text = settings.ServerAddress;
 				serverPort.Text = settings.ServerPort.ToString();
 				username.Text = settings.Username;
-				password.Clear();
+				//password.Clear();
+				password.Password = settings.Password;
 				keyPath.Text = settings.KeyFilePath;
 				keyPassphrase.Clear();
 
