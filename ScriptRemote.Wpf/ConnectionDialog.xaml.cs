@@ -24,6 +24,9 @@ namespace ScriptRemote.Wpf
 {
 	public class ConnectionSettings
 	{
+		public string ConnectName
+		{ get; set; }
+
 		public string ServerAddress
 		{ get; set; }
 
@@ -56,6 +59,7 @@ namespace ScriptRemote.Wpf
 			{
 				return new ConnectionSettings()
 				{
+					ConnectName = ConnectName,
 					ServerAddress = ServerAddress,
 					ServerPort = ServerPort,
 					Username = Username,
@@ -65,6 +69,9 @@ namespace ScriptRemote.Wpf
 				};
 			}
 		}
+
+		public string ConnectName
+		{ get { return connectName.Text; } }
 
 		public string ServerAddress
 		{ get { return serverAddress.Text; } }
@@ -163,39 +170,43 @@ namespace ScriptRemote.Wpf
 		protected override void OnClosed(EventArgs e)
 		{
 			base.OnClosed(e);
+		}
 
-			if (Ok ?? false)
+		/// <summary>
+		/// 保存链接信息
+		/// </summary>
+		protected void OnSave()
+		{
+			var store = IsolatedStorageFile.GetUserStoreForAssembly();
+			try
 			{
-				var store = IsolatedStorageFile.GetUserStoreForAssembly();
-				try
+				var document = new XDocument();
+				var root = new XElement(XName.Get("Settings"));
+				document.Add(root);
+				foreach (var settings in SavedSettings)
 				{
-					var document = new XDocument();
-					var root = new XElement(XName.Get("Settings"));
-					document.Add(root);
-					foreach (var settings in SavedSettings)
-					{
-						var connection = new XElement(XName.Get("Connection"));
-						root.Add(connection);
+					var connection = new XElement(XName.Get("Connection"));
+					root.Add(connection);
 
-						connection.Add(new XElement(XName.Get("ServerAddress"), settings.ServerAddress));
-						connection.Add(new XElement(XName.Get("ServerPort"), settings.ServerPort));
-						connection.Add(new XElement(XName.Get("Username"), settings.Username));
-						connection.Add(new XElement(XName.Get("Password"), settings.Password));
-						connection.Add(new XElement(XName.Get("KeyFilePath"), settings.KeyFilePath));
-					}
-
-					using (var writer = XmlWriter.Create(store.OpenFile(configPath, FileMode.Create)))
-					{
-						document.WriteTo(writer);
-					}
+					connection.Add(new XElement(XName.Get("ServerAddress"), settings.ServerAddress));
+					connection.Add(new XElement(XName.Get("ServerPort"), settings.ServerPort));
+					connection.Add(new XElement(XName.Get("Username"), settings.Username));
+					connection.Add(new XElement(XName.Get("Password"), settings.Password));
+					connection.Add(new XElement(XName.Get("KeyFilePath"), settings.KeyFilePath));
 				}
-				catch (IOException)
+
+				using (var writer = XmlWriter.Create(store.OpenFile(configPath, FileMode.Create)))
 				{
-					MessageBox.Show(this, "Could not access your saved settings.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					document.WriteTo(writer);
 				}
+			}
+			catch (IOException)
+			{
+				MessageBox.Show(this, "Could not access your saved settings.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 		}
 
+		 
 		private void keyPathBrowse_Click(object sender, RoutedEventArgs e)
 		{
 			var dialog = new Microsoft.Win32.OpenFileDialog();
@@ -213,10 +224,15 @@ namespace ScriptRemote.Wpf
 		{
 			SavedSettings.Add(SelectedSettings);
 			settingsList.SelectedIndex = settingsList.Items.Count - 1;
+
+			OnSave();
 		}
 
 		private void close_Click(object sender, RoutedEventArgs e)
 		{
+			// 保存记录
+			OnSave();
+			// 退出
 			Ok = false;
 			Close();
 		}

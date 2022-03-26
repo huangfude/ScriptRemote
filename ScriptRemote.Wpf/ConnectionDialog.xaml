@@ -8,6 +8,7 @@
         Title="Connection Settings" SizeToContent="WidthAndHeight" SnapsToDevicePixels="True" 
         WindowStartupLocation="CenterScreen" MinWidth="550">
     <Window.Resources>
+        <!--
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Height" Value="20"/>
@@ -24,6 +25,7 @@
             <Setter Property="Height" Value="20"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+        -->
         <DataTemplate x:Key="ConnectionItemTemplate">
             <StackPanel Orientation="Horizontal">
                 <StackPanel.ContextMenu>
@@ -56,12 +58,26 @@
                  Grid.Column="0" Grid.RowSpan="5">
         </ListBox>
         <GroupBox Header="Server" Grid.Row="0" Grid.Column="2" Padding="5,5,5,5">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Address" Target="{Binding ElementName=serverAddress}" Padding="0,0,5,0"/>
-                <TextBox x:Name="serverAddress" Width="200"/>
-                <Label Content="Port" Margin="10,0,0,0" Target="{Binding ElementName=serverPort}" Padding="0,0,5,0"/>
-                <TextBox x:Name="serverPort" Width="50" MaxLength="6"/>
-            </StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="Name" Target="{Binding ElementName=connectName}" Grid.Row="0" Grid.Column="0" Padding="0,0,5,0"/>
+                <TextBox x:Name="connectName" Width="150" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" />
+                <Label Content="Address" Target="{Binding ElementName=serverAddress}" Grid.Row="2" Grid.Column="0" Padding="0,0,5,0"/>
+                <TextBox x:Name="serverAddress" Width="150" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"/>
+                <Label Content="Port" Target="{Binding ElementName=serverPort}" Grid.Row="4" Grid.Column="0" Padding="0,0,5,0"/>
+                <TextBox x:Name="serverPort" Width="50" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left"/>
+            </Grid>
+                    
         </GroupBox>
 
         <GroupBox Header="Authentication" Grid.Row="2" Grid.Column="2" Padding="5">

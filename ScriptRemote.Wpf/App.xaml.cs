@@ -49,6 +49,7 @@ namespace ScriptRemote.Wpf
 			var connection = await AskForConnectionAsync();
 			if (connection != null)
 			{
+				// 显示连接窗口
 				MainWindow = MakeWindowForConnection(connection);
 				ShutdownMode = ShutdownMode.OnLastWindowClose;
 			}
@@ -67,6 +68,7 @@ namespace ScriptRemote.Wpf
 				};
 				dialog.Show();
 
+				// 等待关闭事件
 				await Task.Run(new Action(() => closedEvent.WaitOne()));
 
 				if (dialog.Ok ?? false)
@@ -108,6 +110,7 @@ namespace ScriptRemote.Wpf
 
 				connection.Connect(settings, App.DefaultTerminalCols, App.DefaultTerminalRows);
 
+				// 等待执行事件
 				await Task.Run(new Action(() => doneEvent.WaitOne()));
 				if (error != null)
 					throw new ConnectException(error);

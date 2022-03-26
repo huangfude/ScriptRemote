@@ -238,7 +238,7 @@ namespace ScriptRemote.Wpf
 			}
 		}
 
-		string titlePostfix = " - SSH";
+		string titlePostfix = " - ScriptRemote";
 		public string TitlePostfix
 		{
 			get { return titlePostfix; }
