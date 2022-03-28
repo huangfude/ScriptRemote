@@ -24,8 +24,10 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_New Session..." Command="{Binding NewSessionCommand}"/>
                 <MenuItem Header="_Reopen Session" Command="{Binding ReopenSessionCommand}"/>
+                <!--
                 <Separator/>
                 <MenuItem Header="_Transfer Files" Command="{Binding TransferFilesCommand}"/>
+                -->
                 <Separator/>
                 <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
             </MenuItem>

@@ -17,9 +17,6 @@
                     </ContextMenu>
                 </StackPanel.ContextMenu>
                 <TextBlock Text="{Binding ConnectName}"/>
-                <TextBlock Text="["/>
-                <TextBlock Text="{Binding Username}"/>
-                <TextBlock Text="]"/>
                 <!--
                 <TextBlock Text="{Binding Username}"/>
                 <TextBlock Text="@"/>

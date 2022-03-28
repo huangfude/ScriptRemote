@@ -228,6 +228,19 @@ namespace ScriptRemote.Wpf
 
 		private void save_Click(object sender, RoutedEventArgs e)
 		{
+			string userName = SelectedSettings.Username;
+			string address = SelectedSettings.ServerAddress;
+			string conName = SelectedSettings.ConnectName;
+			if(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(address))
+            {
+				displayError("Address or Username can not be empty", "Error");
+				return;
+            }
+			if(string.IsNullOrEmpty(conName))
+            {
+				// 控件赋值
+				connectName.Text = userName + "@" + address;
+			}
 			SavedSettings.Add(SelectedSettings);
 			settingsList.SelectedIndex = settingsList.Items.Count - 1;
 
