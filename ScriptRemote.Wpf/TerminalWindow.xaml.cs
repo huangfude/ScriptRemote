@@ -21,20 +21,20 @@ using ScriptRemote.Terminal.Controls;
 
 namespace ScriptRemote.Wpf
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : MetroWindow
+	/// <summary>
+	/// Interaction logic for TerminalWindow.xaml
+	/// </summary>
+	public partial class TerminalWindow : MetroWindow
     {
-		MainWindowViewModel viewModel;
+		TerminalWindowViewModel viewModel;
 		IWindowStreamNotifier notifier;
 
 		bool initialSized = false;
-		public MainWindow()
+		public TerminalWindow()
 		{
 			InitializeComponent();
 
-			viewModel = new MainWindowViewModel();
+			viewModel = new TerminalWindowViewModel();
 			DataContext = viewModel;
 
 			viewModel.Error += ViewModel_Error;
@@ -58,6 +58,9 @@ namespace ScriptRemote.Wpf
 			//notifier = new SavingShellStreamNotifier(terminalControl, stream, File.OpenWrite("input.log"));
 			viewModel.Connect(notifier, stream, settings);
 			notifier.Start();
+
+			// 默认名称
+			viewModel.Title = settings.Username + "@" + settings.ServerAddress;
 
 			terminalControl.Terminal = viewModel.Terminal;
 		}

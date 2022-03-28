@@ -852,8 +852,14 @@ namespace ScriptRemote.Core.Terminal
 			switch (kind)
 			{
 				case 0:
+					// 暂时不启用变更名称
+					/*
 					if (TitleChanged != null && separatorIndex != sequence.Length)
-						TitleChanged(this, new TitleChangeEventArgs(sequence.Substring(separatorIndex + 1)));
+                    {
+						string title = sequence.Substring(separatorIndex + 1);
+						TitleChanged(this, new TitleChangeEventArgs(title));
+					}
+					*/
 					break;
 
 				default:

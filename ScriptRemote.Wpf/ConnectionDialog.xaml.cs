@@ -1,4 +1,5 @@
-﻿using Renci.SshNet;
+﻿using MahApps.Metro.Controls;
+using Renci.SshNet;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -49,7 +50,7 @@ namespace ScriptRemote.Wpf
 	/// <summary>
 	/// Interaction logic for ConnectionDialog.xaml
 	/// </summary>
-	public partial class ConnectionDialog : Window
+	public partial class ConnectionDialog : MetroWindow
 	{
 		const string configPath = "connect.cfg";
 
@@ -129,6 +130,10 @@ namespace ScriptRemote.Wpf
 						foreach (var settingsElement in document.XPathSelectElements("/Settings/Connection"))
 						{
 							var settings = new ConnectionSettings();
+							string rawConnectName = settingsElement.XPathSelectElement("ConnectName")?.Value;
+							if (rawConnectName != null)
+								settings.ConnectName = rawConnectName;
+
 							string rawServerAddress = settingsElement.XPathSelectElement("ServerAddress")?.Value;
 							if (rawServerAddress != null)
 								settings.ServerAddress = rawServerAddress;
@@ -188,6 +193,7 @@ namespace ScriptRemote.Wpf
 					var connection = new XElement(XName.Get("Connection"));
 					root.Add(connection);
 
+					connection.Add(new XElement(XName.Get("ConnectName"), settings.ConnectName));
 					connection.Add(new XElement(XName.Get("ServerAddress"), settings.ServerAddress));
 					connection.Add(new XElement(XName.Get("ServerPort"), settings.ServerPort));
 					connection.Add(new XElement(XName.Get("Username"), settings.Username));
@@ -264,6 +270,7 @@ namespace ScriptRemote.Wpf
 			if (e.AddedItems.Count > 0)
 			{
 				var settings = e.AddedItems[0] as ConnectionSettings;	// Let an exception happen if the items are not ConnectionSettings
+				connectName.Text = settings.ConnectName;
 				serverAddress.Text = settings.ServerAddress;
 				serverPort.Text = settings.ServerPort.ToString();
 				username.Text = settings.Username;
@@ -272,6 +279,8 @@ namespace ScriptRemote.Wpf
 				keyPath.Text = settings.KeyFilePath;
 				keyPassphrase.Clear();
 
+				if (connectName.Text == "")
+					connectName.Focus();
 				if (serverAddress.Text == "")
 					serverAddress.Focus();
 				else if (serverPort.Text == "")

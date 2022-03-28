@@ -211,7 +211,7 @@ namespace ScriptRemote.Wpf
 		}
 	}
 
-	class MainWindowViewModel : INotifyPropertyChanged
+	class TerminalWindowViewModel : INotifyPropertyChanged
 	{
 		ConnectionSettings settings;
 		ShellStream stream;
@@ -230,23 +230,11 @@ namespace ScriptRemote.Wpf
 		string title;
 		public string Title
 		{
-			get { return title + titlePostfix; }
-			private set
+			get { return title; }
+			set
 			{
 				title = value;
 				notifyPropertyChanged();
-			}
-		}
-
-		string titlePostfix = " - ScriptRemote";
-		public string TitlePostfix
-		{
-			get { return titlePostfix; }
-			private set
-			{
-				titlePostfix = value;
-				notifyPropertyChanged();
-				notifyPropertyChanged(nameof(Title));
 			}
 		}
 
@@ -276,7 +264,7 @@ namespace ScriptRemote.Wpf
 		public ICommand OptionsCommand
 		{ get; }
 
-		public MainWindowViewModel()
+		public TerminalWindowViewModel()
 		{
 			NewSessionCommand = new RelayCommand(onNewSession);
 			ReopenSessionCommand = new RelayCommand(onReopenSession);
@@ -333,6 +321,7 @@ namespace ScriptRemote.Wpf
 				}
 			};
 			terminal.StreamException += Terminal_StreamException;
+			// 监听变更名称事件
 			terminal.TitleChanged += (sender, e) =>
 			{
 				Title = e.Title;

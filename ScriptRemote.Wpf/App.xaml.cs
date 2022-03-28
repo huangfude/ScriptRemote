@@ -80,7 +80,7 @@ namespace ScriptRemote.Wpf
 
 		internal Window MakeWindowForConnection(Connection connection)
 		{
-			var window = new MainWindow();
+			var window = new TerminalWindow();
 			window.Connect(connection.Stream, connection.Settings);
 			window.Show();
 			return window;
