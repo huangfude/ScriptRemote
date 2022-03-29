@@ -18,6 +18,7 @@ using MahApps.Metro.Controls;
 using Renci.SshNet;
 using ScriptRemote.Core.Terminal;
 using ScriptRemote.Terminal.Controls;
+using ScriptRemote.Core.Common;
 
 namespace ScriptRemote.Wpf
 {
@@ -97,7 +98,7 @@ namespace ScriptRemote.Wpf
 			double horizontalStop = stops.X;
 			double verticalStop = stops.Y;
 
-			var terminalOffset = terminalControl.TransformToAncestor(root).Transform(new System.Windows.Point(0, 0));
+			var terminalOffset = terminalControl.TransformToAncestor(terminalGrid).Transform(new System.Windows.Point(0, 0));
 
 			NativeMethods.RECT windowRect;
 			NativeMethods.GetWindowRect(hwnd, out windowRect);
@@ -113,7 +114,7 @@ namespace ScriptRemote.Wpf
 
 		private void this_Loaded(object sender, RoutedEventArgs e)
 		{
-			var content = root;
+			var content = terminalGrid;
 
 			InvalidateMeasure();
 			var contentDesired = terminalControl.TerminalSize;

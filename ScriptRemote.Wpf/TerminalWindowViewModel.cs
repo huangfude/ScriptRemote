@@ -17,6 +17,7 @@ using System.Windows.Threading;
 using ScriptRemote.Core.Terminal;
 using ScriptRemote.Terminal.Controls;
 using Point = ScriptRemote.Core.Terminal.Point;
+using ScriptRemote.Core.Common;
 
 namespace ScriptRemote.Wpf
 {

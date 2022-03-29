@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScriptRemote.Core.Common;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -61,7 +62,8 @@ namespace ScriptRemote.Wpf
 		{
 			using (var closedEvent = new System.Threading.ManualResetEvent(false))
 			{
-				var dialog = new ConnectionDialog();
+				//var dialog = new ConnectionDialog();
+				var dialog = new MainWindow();
 				dialog.Closed += (sender, e) =>
 				{
 					closedEvent.Set();

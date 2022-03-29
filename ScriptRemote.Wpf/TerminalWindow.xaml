@@ -10,40 +10,12 @@
         FocusManager.FocusedElement="{Binding ElementName=terminalControl}" 
         GotKeyboardFocus="OnKeyboardFocus"
         Title="{Binding Title}" Height="520" Width="1000">
-    <Grid x:Name="root">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        
-        <Menu x:Name="menu" Grid.Row="0">
-            <MenuItem Header="_File">
-                <MenuItem Header="_New Session..." Command="{Binding NewSessionCommand}"/>
-                <MenuItem Header="_Reopen Session" Command="{Binding ReopenSessionCommand}"/>
-                <!--
-                <Separator/>
-                <MenuItem Header="_Transfer Files" Command="{Binding TransferFilesCommand}"/>
-                -->
-                <Separator/>
-                <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
-            </MenuItem>
-            <MenuItem Header="_Tools">
-                <MenuItem Header="_Options" Command="{Binding OptionsCommand}"/>
-            </MenuItem>
-        </Menu>
+    <Grid x:Name="terminalGrid">
 
         <term:TerminalControl x:Name="terminalControl" FontFamily="Consolas" Focusable="True" FocusVisualStyle="{x:Null}" 
-                              FontSize="13" Background="Black" Grid.Row="1" Width="Auto" Height="Auto"
-                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SnapsToDevicePixels="True">
+                                FontSize="13" Background="Black" Width="Auto" Height="Auto"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SnapsToDevicePixels="True">
         </term:TerminalControl>
 
-        <TextBlock Grid.Row="2"
-                   Foreground="{StaticResource MahApps.Brushes.Foreground}">
-            Script Remote
-        </TextBlock>
     </Grid>
 </mah:MetroWindow>

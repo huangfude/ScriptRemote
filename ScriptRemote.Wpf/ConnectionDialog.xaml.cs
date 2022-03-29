@@ -1,5 +1,6 @@
 ﻿using MahApps.Metro.Controls;
 using Renci.SshNet;
+using ScriptRemote.Core.Common;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,29 +24,6 @@ using System.Xml.XPath;
 
 namespace ScriptRemote.Wpf
 {
-	public class ConnectionSettings
-	{
-		public string ConnectName
-		{ get; set; }
-
-		public string ServerAddress
-		{ get; set; }
-
-		public int ServerPort
-		{ get; set; }
-
-		public string Username
-		{ get; set; }
-
-		public string Password
-		{ get; set; }
-
-		public string KeyFilePath
-		{ get; set; }
-
-		public string KeyFilePassphrase
-		{ get; set; }
-	}
 
 	/// <summary>
 	/// Interaction logic for ConnectionDialog.xaml
@@ -185,21 +163,25 @@ namespace ScriptRemote.Wpf
 			var store = IsolatedStorageFile.GetUserStoreForAssembly();
 			try
 			{
-				var document = new XDocument();
 				var root = new XElement(XName.Get("Settings"));
-				document.Add(root);
+				int index = 0;
 				foreach (var settings in SavedSettings)
 				{
 					var connection = new XElement(XName.Get("Connection"));
-					root.Add(connection);
-
+					connection.Add(new XElement(XName.Get("Index"), index.ToString()));
 					connection.Add(new XElement(XName.Get("ConnectName"), settings.ConnectName));
 					connection.Add(new XElement(XName.Get("ServerAddress"), settings.ServerAddress));
 					connection.Add(new XElement(XName.Get("ServerPort"), settings.ServerPort));
 					connection.Add(new XElement(XName.Get("Username"), settings.Username));
 					connection.Add(new XElement(XName.Get("Password"), settings.Password));
 					connection.Add(new XElement(XName.Get("KeyFilePath"), settings.KeyFilePath));
+
+					root.Add(connection);
+					index++;
 				}
+
+				var document = new XDocument();
+				document.Add(root);
 
 				using (var writer = XmlWriter.Create(store.OpenFile(configPath, FileMode.Create)))
 				{
