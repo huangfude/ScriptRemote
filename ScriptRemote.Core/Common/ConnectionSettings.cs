@@ -8,9 +8,6 @@ namespace ScriptRemote.Core.Common
 {
 	public class ConnectionSettings
 	{
-		public string Index
-		{ get; set; }
-
 		public string ConnectName
 		{ get; set; }
 

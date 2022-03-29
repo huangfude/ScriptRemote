@@ -42,7 +42,7 @@ namespace ScriptRemote.Wpf
 				{
 					using (var reader = new StreamReader(store.OpenFile(CommonConst.configPath, FileMode.Open)))
 					{
-						var document = XDocument.Load(reader);
+						var document = XDocument.Load(reader, LoadOptions.PreserveWhitespace);
 
 						foreach (var settingsElement in document.XPathSelectElements("/Settings/Connection"))
 						{
@@ -85,7 +85,7 @@ namespace ScriptRemote.Wpf
 				}
 				catch (Exception ex) when (ex is IOException || ex is XmlException)
 				{
-					MessageBox.Show(this, "Could not access your saved settings.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					App.Current.DisplayError(ex.Message, "Error");
 				}
 			}
 		}
@@ -122,9 +122,18 @@ namespace ScriptRemote.Wpf
 			}
 		}
 
+		private void settingsListItem_Edit(object sender, RoutedEventArgs e)
+		{
+			var dialog = new ConnectionDialog();
+			dialog.SettingsEdit((sender as MenuItem).Tag as ConnectionSettings);
+			dialog.ShowDialog();
+		}
+
 		private void settingsListItem_Delete(object sender, RoutedEventArgs e)
 		{
 			GlobalVariable.SavedSettings.Remove((sender as MenuItem).Tag as ConnectionSettings);
+			// 保存信息
+			App.Current.OnSave();
 		}
 
 		private async void Button_MouseDoubleClick(object sender, MouseButtonEventArgs e)

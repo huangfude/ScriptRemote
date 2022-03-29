@@ -85,51 +85,6 @@ namespace ScriptRemote.Wpf
 			InitializeComponent();
 
 			Loaded += (sender, e) => { MinHeight = ActualHeight; MaxHeight = ActualHeight; };
-
-		}
-
-		protected override void OnClosed(EventArgs e)
-		{
-			base.OnClosed(e);
-		}
-
-		/// <summary>
-		/// 保存链接信息
-		/// </summary>
-		protected void OnSave()
-		{
-			var store = IsolatedStorageFile.GetUserStoreForAssembly();
-			try
-			{
-				var root = new XElement(XName.Get("Settings"));
-				int index = 0;
-				foreach (var settings in GlobalVariable.SavedSettings)
-				{
-					var connection = new XElement(XName.Get("Connection"));
-					connection.Add(new XElement(XName.Get("Index"), index.ToString()));
-					connection.Add(new XElement(XName.Get("ConnectName"), settings.ConnectName));
-					connection.Add(new XElement(XName.Get("ServerAddress"), settings.ServerAddress));
-					connection.Add(new XElement(XName.Get("ServerPort"), settings.ServerPort));
-					connection.Add(new XElement(XName.Get("Username"), settings.Username));
-					connection.Add(new XElement(XName.Get("Password"), settings.Password));
-					connection.Add(new XElement(XName.Get("KeyFilePath"), settings.KeyFilePath));
-
-					root.Add(connection);
-					index++;
-				}
-
-				var document = new XDocument();
-				document.Add(root);
-
-				using (var writer = XmlWriter.Create(store.OpenFile(CommonConst.configPath, FileMode.Create)))
-				{
-					document.WriteTo(writer);
-				}
-			}
-			catch (IOException)
-			{
-				App.Current.DisplayError("Could not access your saved settings.", "Error");
-			}
 		}
 
 		 
@@ -162,47 +117,42 @@ namespace ScriptRemote.Wpf
 				connectName.Text = userName + "@" + address;
 			}
 			GlobalVariable.SavedSettings.Add(SelectedSettings);
-
-			OnSave();
-		}
-
-		private void close_Click(object sender, RoutedEventArgs e)
-		{
-			// 保存记录
-			OnSave();
+			App.Current.OnSave();
 			// 退出
 			Close();
 		}
 
-		private void settingsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		private void close_Click(object sender, RoutedEventArgs e)
 		{
-			if (e.AddedItems.Count > 0)
-			{
-				var settings = e.AddedItems[0] as ConnectionSettings;	// Let an exception happen if the items are not ConnectionSettings
-				connectName.Text = settings.ConnectName;
-				serverAddress.Text = settings.ServerAddress;
-				serverPort.Text = settings.ServerPort.ToString();
-				username.Text = settings.Username;
-				//password.Clear();
-				password.Password = settings.Password;
-				keyPath.Text = settings.KeyFilePath;
-				keyPassphrase.Clear();
-
-				if (connectName.Text == "")
-					connectName.Focus();
-				if (serverAddress.Text == "")
-					serverAddress.Focus();
-				else if (serverPort.Text == "")
-					serverPort.Focus();
-				else if (username.Text == "")
-					username.Focus();
-				else if (keyPath.Text == "")
-					password.Focus();
-				else
-					keyPassphrase.Focus();
-			}
+			// 退出
+			Close();
 		}
 
+		public void SettingsEdit(ConnectionSettings settings)
+		{
+			connectName.Text = settings.ConnectName;
+			serverAddress.Text = settings.ServerAddress;
+			serverPort.Text = settings.ServerPort.ToString();
+			username.Text = settings.Username;
+			//password.Clear();
+			password.Password = settings.Password;
+			keyPath.Text = settings.KeyFilePath;
+			keyPassphrase.Clear();
+
+			if (connectName.Text == "")
+				connectName.Focus();
+			if (serverAddress.Text == "")
+				serverAddress.Focus();
+			else if (serverPort.Text == "")
+				serverPort.Focus();
+			else if (username.Text == "")
+				username.Focus();
+			else if (keyPath.Text == "")
+				password.Focus();
+			else
+				keyPassphrase.Focus();
+			
+		}
 		
 	}
 }
