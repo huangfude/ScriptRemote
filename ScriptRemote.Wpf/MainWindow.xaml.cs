@@ -26,11 +26,6 @@ namespace ScriptRemote.Wpf
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-		public Connection Connection
-		{ get; private set; }
-
-		public bool? Ok
-		{ get; private set; }
 
 		public MainWindow()
         {
@@ -95,29 +90,81 @@ namespace ScriptRemote.Wpf
 			}
 		}
 
+		internal async Task<Connection> MakeConnectionAsync(ConnectionSettings settings, int terminalCols, int terminalRows)
+		{
+			using (var doneEvent = new System.Threading.ManualResetEvent(false))
+			{
+				var connection = new Connection();
+				string error = null;
+				connection.Connected += (_sender, _e) =>
+				{
+					Dispatcher.Invoke(() =>
+					{
+						doneEvent.Set();
+					});
+				};
+				connection.Failed += (_sender, _e) =>
+				{
+					Dispatcher.Invoke(() =>
+					{
+						error = _e.Message;
+						doneEvent.Set();
+					});
+				};
+
+				connection.Connect(settings, terminalCols, terminalRows);
+
+				// 等待执行事件
+				await Task.Run(new Action(() => doneEvent.WaitOne()));
+				if (error != null)
+					throw new ConnectException(error);
+				return connection;
+			}
+		}
+
 		private void settingsListItem_Delete(object sender, RoutedEventArgs e)
 		{
 			GlobalVariable.SavedSettings.Remove((sender as MenuItem).Tag as ConnectionSettings);
 		}
 
-        private async void Button_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
+		private async void Button_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+		{
 			// 鼠标左键双击
 			if (e.ChangedButton == MouseButton.Left)
 			{
-				IsEnabled = false;
-				try
-				{
-					ConnectionSettings SelectedSettings = (sender as Button).Tag as ConnectionSettings;
-					Connection = await App.Current.MakeConnectionAsync(SelectedSettings, App.DefaultTerminalCols, App.DefaultTerminalRows);
-					Ok = true;
-					Close();
-				}
-				catch (ConnectException ex)
-				{
-					IsEnabled = true;
-				}
+				Button btn = sender as Button;
+				string content = btn.Content as string;
+
+				ConnectionSettings SelectedSettings = (sender as Button).Tag as ConnectionSettings;
+				Connection connection = await MakeConnectionAsync(SelectedSettings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
+
+				// 添加TabItem
+				TabItem tabItem = new TabItem();
+				tabItem.Header = content;
+
+				// 添加TabItem的内容
+				TerminalTabControl terminalTab = new TerminalTabControl();
+				terminalTab.Height = tabControl.ActualHeight;
+				terminalTab.Width = tabControl.ActualWidth;
+				// 连接
+				terminalTab.Connect(connection.Stream, connection.Settings);
+
+				tabItem.Content = terminalTab;
+
+				//添加到TabControl
+				tabControl.Items.Add(tabItem);
 			}
+		}
+
+        private void MenuItem_Click_Exit(object sender, RoutedEventArgs e)
+        {
+			App.Current.Shutdown();
+        }
+
+        private void MenuItem_Click_New(object sender, RoutedEventArgs e)
+        {
+			var dialog = new ConnectionDialog();
+			dialog.ShowDialog();
 		}
     }
 }

@@ -30,7 +30,6 @@ namespace ScriptRemote.Wpf
 	/// </summary>
 	public partial class ConnectionDialog : MetroWindow
 	{
-		const string configPath = "connect.cfg";
 
 		public ConnectionSettings SelectedSettings
 		{
@@ -78,13 +77,6 @@ namespace ScriptRemote.Wpf
 		public string KeyFilePassphrase
 		{ get { return keyPassphrase.Password; } }
 
-		public ObservableCollection<ConnectionSettings> SavedSettings = new ObservableCollection<ConnectionSettings>();
-
-		public Connection Connection
-		{ get; private set; }
-
-		public bool? Ok
-		{ get; private set; }
 
 		public ConnectionDialog()
 		{
@@ -94,60 +86,6 @@ namespace ScriptRemote.Wpf
 
 			Loaded += (sender, e) => { MinHeight = ActualHeight; MaxHeight = ActualHeight; };
 
-			settingsList.ItemsSource = SavedSettings;
-
-			var store = IsolatedStorageFile.GetUserStoreForAssembly();
-			if (store.FileExists(configPath))
-			{
-				try
-				{
-					using (var reader = new StreamReader(store.OpenFile(configPath, FileMode.Open)))
-					{
-						var document = XDocument.Load(reader);
-
-						foreach (var settingsElement in document.XPathSelectElements("/Settings/Connection"))
-						{
-							var settings = new ConnectionSettings();
-							string rawConnectName = settingsElement.XPathSelectElement("ConnectName")?.Value;
-							if (rawConnectName != null)
-								settings.ConnectName = rawConnectName;
-
-							string rawServerAddress = settingsElement.XPathSelectElement("ServerAddress")?.Value;
-							if (rawServerAddress != null)
-								settings.ServerAddress = rawServerAddress;
-
-							string rawServerPort = settingsElement.XPathSelectElement("ServerPort")?.Value;
-							if (rawServerPort != null)
-							{
-								int serverPort = 0;
-								int.TryParse(rawServerPort, out serverPort);
-								settings.ServerPort = serverPort;
-							}
-
-							string rawUsername = settingsElement.XPathSelectElement("Username")?.Value;
-							if (rawUsername != null)
-								settings.Username = rawUsername;
-
-							string rawPassword = settingsElement.XPathSelectElement("Password")?.Value;
-							if (rawPassword != null)
-								settings.Password = rawPassword;
-
-							string rawKeyFilePath = settingsElement.XPathSelectElement("KeyFilePath")?.Value;
-							if (rawKeyFilePath != null)
-								settings.KeyFilePath = rawKeyFilePath;
-
-							SavedSettings.Add(settings);
-						}
-					}
-
-					if (SavedSettings.Count > 0)
-						settingsList.SelectedIndex = 0;
-				}
-				catch (Exception ex) when (ex is IOException || ex is XmlException)
-				{
-					MessageBox.Show(this, "Could not access your saved settings.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-				}
-            }
 		}
 
 		protected override void OnClosed(EventArgs e)
@@ -165,7 +103,7 @@ namespace ScriptRemote.Wpf
 			{
 				var root = new XElement(XName.Get("Settings"));
 				int index = 0;
-				foreach (var settings in SavedSettings)
+				foreach (var settings in GlobalVariable.SavedSettings)
 				{
 					var connection = new XElement(XName.Get("Connection"));
 					connection.Add(new XElement(XName.Get("Index"), index.ToString()));
@@ -183,14 +121,14 @@ namespace ScriptRemote.Wpf
 				var document = new XDocument();
 				document.Add(root);
 
-				using (var writer = XmlWriter.Create(store.OpenFile(configPath, FileMode.Create)))
+				using (var writer = XmlWriter.Create(store.OpenFile(CommonConst.configPath, FileMode.Create)))
 				{
 					document.WriteTo(writer);
 				}
 			}
 			catch (IOException)
 			{
-				MessageBox.Show(this, "Could not access your saved settings.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				App.Current.DisplayError("Could not access your saved settings.", "Error");
 			}
 		}
 
@@ -215,7 +153,7 @@ namespace ScriptRemote.Wpf
 			string conName = SelectedSettings.ConnectName;
 			if(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(address))
             {
-				displayError("Address or Username can not be empty", "Error");
+				App.Current.DisplayError("Address or Username can not be empty", "Error");
 				return;
             }
 			if(string.IsNullOrEmpty(conName))
@@ -223,8 +161,7 @@ namespace ScriptRemote.Wpf
 				// 控件赋值
 				connectName.Text = userName + "@" + address;
 			}
-			SavedSettings.Add(SelectedSettings);
-			settingsList.SelectedIndex = settingsList.Items.Count - 1;
+			GlobalVariable.SavedSettings.Add(SelectedSettings);
 
 			OnSave();
 		}
@@ -234,30 +171,7 @@ namespace ScriptRemote.Wpf
 			// 保存记录
 			OnSave();
 			// 退出
-			Ok = false;
 			Close();
-		}
-
-		void displayError(string message, string title)
-		{
-			MessageBox.Show(this, message, title, MessageBoxButton.OK, MessageBoxImage.Error);
-		}
-
-		async void connect_Click(object sender, RoutedEventArgs e)
-		{
-			IsEnabled = false;
-
-			try
-			{
-				Connection = await App.Current.MakeConnectionAsync(SelectedSettings, App.DefaultTerminalCols, App.DefaultTerminalRows);
-				Ok = true;
-				Close();
-			}
-			catch (ConnectException ex)
-			{
-				IsEnabled = true;
-				displayError(ex.Message, "Could not connect");
-			}
 		}
 
 		private void settingsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -289,9 +203,6 @@ namespace ScriptRemote.Wpf
 			}
 		}
 
-		private void settingsListItem_Delete(object sender, RoutedEventArgs e)
-		{
-			SavedSettings.Remove((sender as MenuItem).Tag as ConnectionSettings);
-		}
+		
 	}
 }

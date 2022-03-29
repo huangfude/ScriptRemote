@@ -9,26 +9,13 @@ using System.Windows;
 
 namespace ScriptRemote.Wpf
 {
-	[Serializable]
-	public class ConnectException : Exception
-	{
-		public ConnectException() { }
-		public ConnectException(string message) : base(message) { }
-		public ConnectException(string message, Exception inner) : base(message, inner) { }
-		protected ConnectException(
-		  System.Runtime.Serialization.SerializationInfo info,
-		  System.Runtime.Serialization.StreamingContext context) : base(info, context)
-		{ }
-	}
 
 	/// <summary>
 	/// Interaction logic for App.xaml
 	/// </summary>
 	public partial class App : Application
     {
-		public const int DefaultTerminalCols = 160;
-		public const int DefaultTerminalRows = 40;
-
+		
 		public static new App Current
 		{ get { return Application.Current as App; } }
 
@@ -44,80 +31,10 @@ namespace ScriptRemote.Wpf
 			Shutdown(1);
 		}
 
-		private async void this_Startup(object sender, StartupEventArgs e)
+		public void DisplayError(string message, string title)
 		{
-			ShutdownMode = ShutdownMode.OnExplicitShutdown;
-			var connection = await AskForConnectionAsync();
-			if (connection != null)
-			{
-				// 显示连接窗口
-				MainWindow = MakeWindowForConnection(connection);
-				ShutdownMode = ShutdownMode.OnLastWindowClose;
-			}
-			else
-				Shutdown();
+			MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 
-		internal async Task<Connection> AskForConnectionAsync()
-		{
-			using (var closedEvent = new System.Threading.ManualResetEvent(false))
-			{
-				//var dialog = new ConnectionDialog();
-				var dialog = new MainWindow();
-				dialog.Closed += (sender, e) =>
-				{
-					closedEvent.Set();
-				};
-				dialog.Show();
-
-				// 等待关闭事件
-				await Task.Run(new Action(() => closedEvent.WaitOne()));
-
-				if (dialog.Ok ?? false)
-					return dialog.Connection;
-				else
-					return null;
-			}
-		}
-
-		internal Window MakeWindowForConnection(Connection connection)
-		{
-			var window = new TerminalWindow();
-			window.Connect(connection.Stream, connection.Settings);
-			window.Show();
-			return window;
-		}
-
-		internal async Task<Connection> MakeConnectionAsync(ConnectionSettings settings, int terminalCols, int terminalRows)
-		{
-			using (var doneEvent = new System.Threading.ManualResetEvent(false))
-			{
-				var connection = new Connection();
-				string error = null;
-				connection.Connected += (_sender, _e) =>
-				{
-					Dispatcher.Invoke(() =>
-					{
-						doneEvent.Set();
-					});
-				};
-				connection.Failed += (_sender, _e) =>
-				{
-					Dispatcher.Invoke(() =>
-					{
-						error = _e.Message;
-						doneEvent.Set();
-					});
-				};
-
-				connection.Connect(settings, App.DefaultTerminalCols, App.DefaultTerminalRows);
-
-				// 等待执行事件
-				await Task.Run(new Action(() => doneEvent.WaitOne()));
-				if (error != null)
-					throw new ConnectException(error);
-				return connection;
-			}
-		}
 	}
 }

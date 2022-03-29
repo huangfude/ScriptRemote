@@ -32,4 +32,18 @@ namespace ScriptRemote.Core.Common
 		public string KeyFilePassphrase
 		{ get; set; }
 	}
+
+
+	[Serializable]
+	public class ConnectException : Exception
+	{
+		public ConnectException() { }
+		public ConnectException(string message) : base(message) { }
+		public ConnectException(string message, Exception inner) : base(message, inner) { }
+		protected ConnectException(
+		  System.Runtime.Serialization.SerializationInfo info,
+		  System.Runtime.Serialization.StreamingContext context) : base(info, context)
+		{ }
+	}
+
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Renci.SshNet;
+using ScriptRemote.Core.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,33 +11,27 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using MahApps.Metro.Controls;
-using Renci.SshNet;
-using ScriptRemote.Core.Terminal;
-using ScriptRemote.Terminal.Controls;
-using ScriptRemote.Core.Common;
 
 namespace ScriptRemote.Wpf
 {
-	/// <summary>
-	/// Interaction logic for TerminalWindow.xaml
-	/// </summary>
-	public partial class TerminalWindow : MetroWindow
+    /// <summary>
+    /// Interaction logic for TerminalTabControl.xaml
+    /// </summary>
+    public partial class TerminalTabControl : UserControl
     {
-		TerminalWindowViewModel viewModel;
+		TerminalViewModel viewModel;
 		IWindowStreamNotifier notifier;
 
 		bool initialSized = false;
-		public TerminalWindow()
+		public TerminalTabControl()
 		{
 			InitializeComponent();
 
-			viewModel = new TerminalWindowViewModel();
+			viewModel = new TerminalViewModel();
 			DataContext = viewModel;
 
 			viewModel.Error += ViewModel_Error;
@@ -43,12 +39,12 @@ namespace ScriptRemote.Wpf
 			IsVisibleChanged += this_IsVisibleChanged;
 			SizeChanged += this_SizeChanged;
 
-			Loaded += this_Loaded;
+			//Loaded += this_Loaded;
 		}
 
 		private void ViewModel_Error(object sender, ErrorEventArgs e)
 		{
-			MessageBox.Show(this, e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 
 		public void Connect(ShellStream stream, ConnectionSettings settings)
@@ -61,14 +57,14 @@ namespace ScriptRemote.Wpf
 			notifier.Start();
 
 			// 默认名称
-			viewModel.Title = settings.Username + "@" + settings.ServerAddress;
+			//viewModel.Title = settings.Username + "@" + settings.ServerAddress;
 
 			terminalControl.Terminal = viewModel.Terminal;
 		}
 
-		protected override void OnClosed(EventArgs e)
+		protected void OnClosed(EventArgs e)
 		{
-			base.OnClosed(e);
+			//base.OnClosed(e);
 
 			notifier?.Stop();
 		}
@@ -77,37 +73,31 @@ namespace ScriptRemote.Wpf
 		{
 			IsVisibleChanged -= this_IsVisibleChanged;
 
-			resizeTerminal(App.DefaultTerminalCols, App.DefaultTerminalRows);
+			resizeTerminal(CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
 		}
 
 		private void this_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
 		{
+			/*
 			if (!initialSized)
 			{
 				initialSized = true;
 				return;
 			}
+			*/
 
-			terminalControl.Width = double.NaN;
-			terminalControl.Height = double.NaN;
+			//terminalControl.Width = double.NaN;
+			//terminalControl.Height = double.NaN;
 
-			IntPtr hwnd = new WindowInteropHelper(this).Handle;
 
 			var transformer = PresentationSource.FromVisual(this).CompositionTarget.TransformToDevice;
 			var stops = transformer.Transform(new System.Windows.Point(terminalControl.CharWidth, terminalControl.CharHeight));
 			double horizontalStop = stops.X;
 			double verticalStop = stops.Y;
 
-			var terminalOffset = terminalControl.TransformToAncestor(terminalGrid).Transform(new System.Windows.Point(0, 0));
 
-			NativeMethods.RECT windowRect;
-			NativeMethods.GetWindowRect(hwnd, out windowRect);
-
-			NativeMethods.RECT clientRect;
-			NativeMethods.GetClientRect(hwnd, out clientRect);
-
-			int newCols = (int)((clientRect.right - terminalOffset.X - SystemParameters.ScrollWidth + 1f) / horizontalStop);
-			int newRows = (int)((clientRect.bottom - terminalOffset.Y + 1f) / verticalStop);
+			int newCols = (int)((terminalControl.Width + 1f) / horizontalStop);
+			int newRows = (int)((terminalControl.Height + 1f) / verticalStop);
 
 			viewModel.ChangeSize(newCols, newRows);
 		}

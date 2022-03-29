@@ -15,6 +15,8 @@ namespace ScriptRemote.Core.Common
         // 配置文件
         public const string configPath = "connect.cfg";
 
+        public const int DefaultTerminalCols = 160;
+        public const int DefaultTerminalRows = 40;
 
     }
 
