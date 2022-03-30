@@ -6,8 +6,8 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:ScriptRemote.Wpf"
              xmlns:term="clr-namespace:ScriptRemote.Terminal.Controls;assembly=ScriptRemote.Terminal.Controls"
-            FocusManager.FocusedElement="{Binding ElementName=terminalControl}" 
-            GotKeyboardFocus="OnKeyboardFocus"
+             FocusManager.FocusedElement="{Binding ElementName=terminalControl}" 
+             GotKeyboardFocus="OnKeyboardFocus"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid x:Name="terminalGrid">

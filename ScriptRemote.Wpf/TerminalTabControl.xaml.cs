@@ -36,10 +36,11 @@ namespace ScriptRemote.Wpf
 
 			viewModel.Error += ViewModel_Error;
 
-			IsVisibleChanged += this_IsVisibleChanged;
-			SizeChanged += this_SizeChanged;
+			//IsVisibleChanged += this_IsVisibleChanged;
+			//SizeChanged += this_SizeChanged;
 
 			//Loaded += this_Loaded;
+
 		}
 
 		private void ViewModel_Error(object sender, ErrorEventArgs e)
@@ -76,7 +77,7 @@ namespace ScriptRemote.Wpf
 			resizeTerminal(CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
 		}
 
-		private void this_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
+		public void this_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
 		{
 			/*
 			if (!initialSized)
@@ -86,23 +87,34 @@ namespace ScriptRemote.Wpf
 			}
 			*/
 
-			//terminalControl.Width = double.NaN;
-			//terminalControl.Height = double.NaN;
+			double width = ActualWidth;
+			double height = ActualHeight;
+
+			if (typeof(TabControl).FullName.Equals(sender.GetType().FullName))
+            {
+				TabControl tabControl = sender as TabControl;
+				width = tabControl.ActualWidth;
+				height = tabControl.ActualHeight;
+				
+				// 控件大小
+				Width = width;
+				Height = height;
+			}
 
 
-			var transformer = PresentationSource.FromVisual(this).CompositionTarget.TransformToDevice;
-			var stops = transformer.Transform(new System.Windows.Point(terminalControl.CharWidth, terminalControl.CharHeight));
-			double horizontalStop = stops.X;
-			double verticalStop = stops.Y;
+			//var transformer = PresentationSource.FromVisual(terminalControl).CompositionTarget.TransformToDevice;
+			//var stops = transformer.Transform(new System.Windows.Point(terminalControl.CharWidth, terminalControl.CharHeight));
+			double horizontalStop = terminalControl.CharWidth;
+			double verticalStop = terminalControl.CharHeight;
 
 
-			int newCols = (int)((terminalControl.Width + 1f) / horizontalStop);
-			int newRows = (int)((terminalControl.Height + 1f) / verticalStop);
+			int newCols = (int)((width - SystemParameters.ScrollWidth + 1f) / horizontalStop);
+			int newRows = (int)((height + 1f) / verticalStop);
 
 			viewModel.ChangeSize(newCols, newRows);
 		}
 
-		private void this_Loaded(object sender, RoutedEventArgs e)
+		public void this_Loaded(object sender, RoutedEventArgs e)
 		{
 			var content = terminalGrid;
 
@@ -119,7 +131,7 @@ namespace ScriptRemote.Wpf
 			terminalControl.Height = rows * terminalControl.CharHeight;
 		}
 
-		void OnKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		public void OnKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
 		{
 			if (e.NewFocus == this)
 			{

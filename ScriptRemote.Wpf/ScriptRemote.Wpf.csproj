@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Huang.jpg" />
+    <None Remove="Huang.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
   </ItemGroup>
   
@@ -17,6 +22,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ScriptRemote.Terminal.Controls\ScriptRemote.Terminal.Controls.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Huang.png" />
   </ItemGroup>
 
 </Project>

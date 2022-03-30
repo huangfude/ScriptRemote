@@ -159,6 +159,10 @@ namespace ScriptRemote.Wpf
 				terminalTab.Connect(connection.Stream, connection.Settings);
 
 				tabItem.Content = terminalTab;
+				// 设置选中
+				tabItem.IsSelected = true;
+				
+				tabControl.SizeChanged += terminalTab.this_SizeChanged;
 
 				//添加到TabControl
 				tabControl.Items.Add(tabItem);
