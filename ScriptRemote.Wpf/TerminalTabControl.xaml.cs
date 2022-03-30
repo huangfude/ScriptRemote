@@ -36,7 +36,6 @@ namespace ScriptRemote.Wpf
 
 			viewModel.Error += ViewModel_Error;
 
-			//IsVisibleChanged += this_IsVisibleChanged;
 			//SizeChanged += this_SizeChanged;
 
 			//Loaded += this_Loaded;
@@ -63,18 +62,14 @@ namespace ScriptRemote.Wpf
 			terminalControl.Terminal = viewModel.Terminal;
 		}
 
-		protected void OnClosed(EventArgs e)
-		{
-			//base.OnClosed(e);
 
-			notifier?.Stop();
-		}
-
-		private void this_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-		{
-			IsVisibleChanged -= this_IsVisibleChanged;
-
-			resizeTerminal(CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
+		public void this_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+			// 不可见的时候
+			if((bool)e.NewValue == false)
+            {
+				notifier?.Stop();
+			}
 		}
 
 		public void this_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
@@ -125,11 +120,6 @@ namespace ScriptRemote.Wpf
 			Height = contentDesired.Height + ActualHeight - content.ActualHeight;
 		}
 
-		private void resizeTerminal(int cols, int rows)
-		{
-			terminalControl.Width = cols * terminalControl.CharWidth + SystemParameters.ScrollWidth;
-			terminalControl.Height = rows * terminalControl.CharHeight;
-		}
 
 		public void OnKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
 		{

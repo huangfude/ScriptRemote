@@ -27,6 +27,8 @@ namespace ScriptRemote.Wpf
     public partial class MainWindow : MetroWindow
     {
 
+		int lastClickTimestamp = 1000;
+
 		public MainWindow()
         {
             DataContext = this;
@@ -136,20 +138,21 @@ namespace ScriptRemote.Wpf
 			App.Current.OnSave();
 		}
 
-		private async void Button_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-		{
-			// 鼠标左键双击
-			if (e.ChangedButton == MouseButton.Left)
-			{
-				Button btn = sender as Button;
-				string content = btn.Content as string;
+		
 
-				ConnectionSettings SelectedSettings = (sender as Button).Tag as ConnectionSettings;
+		private async void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+		{
+			if (e.Timestamp - lastClickTimestamp < 500)
+			{
+				// 鼠标左键双击
+				TextBlock textBlock = sender as TextBlock;
+
+				ConnectionSettings SelectedSettings = textBlock.Tag as ConnectionSettings;
 				Connection connection = await MakeConnectionAsync(SelectedSettings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
 
 				// 添加TabItem
 				TabItem tabItem = new TabItem();
-				tabItem.Header = content;
+				tabItem.Header = textBlock.Text;
 
 				// 添加TabItem的内容
 				TerminalTabControl terminalTab = new TerminalTabControl();
@@ -161,15 +164,18 @@ namespace ScriptRemote.Wpf
 				tabItem.Content = terminalTab;
 				// 设置选中
 				tabItem.IsSelected = true;
-				
+				tabItem.IsVisibleChanged += terminalTab.this_IsVisibleChanged;
+
 				tabControl.SizeChanged += terminalTab.this_SizeChanged;
 
 				//添加到TabControl
 				tabControl.Items.Add(tabItem);
 			}
+
+			lastClickTimestamp = e.Timestamp;
 		}
 
-        private void MenuItem_Click_Exit(object sender, RoutedEventArgs e)
+		private void MenuItem_Click_Exit(object sender, RoutedEventArgs e)
         {
 			App.Current.Shutdown();
         }
@@ -179,5 +185,7 @@ namespace ScriptRemote.Wpf
 			var dialog = new ConnectionDialog();
 			dialog.ShowDialog();
 		}
+
+        
     }
 }
