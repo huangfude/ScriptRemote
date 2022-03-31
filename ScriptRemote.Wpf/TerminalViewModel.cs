@@ -17,6 +17,7 @@ using System.Windows.Threading;
 using ScriptRemote.Core.Terminal;
 using ScriptRemote.Terminal.Controls;
 using Point = ScriptRemote.Core.Terminal.Point;
+using ScriptRemote.Core.Common;
 
 namespace ScriptRemote.Wpf
 {
@@ -211,7 +212,7 @@ namespace ScriptRemote.Wpf
 		}
 	}
 
-	class TerminalWindowViewModel : INotifyPropertyChanged
+	class TerminalViewModel : INotifyPropertyChanged
 	{
 		ConnectionSettings settings;
 		ShellStream stream;
@@ -249,64 +250,6 @@ namespace ScriptRemote.Wpf
 			}
 		}
 
-		public ICommand NewSessionCommand
-		{ get; }
-
-		public ICommand ReopenSessionCommand
-		{ get; }
-
-		public ICommand TransferFilesCommand
-		{ get; }
-
-		public ICommand ExitCommand
-		{ get; }
-
-		public ICommand OptionsCommand
-		{ get; }
-
-		public TerminalWindowViewModel()
-		{
-			NewSessionCommand = new RelayCommand(onNewSession);
-			ReopenSessionCommand = new RelayCommand(onReopenSession);
-			TransferFilesCommand = new RelayCommand(onTransferFiles);
-			ExitCommand = new RelayCommand(onExitCommand);
-			OptionsCommand = new RelayCommand(onOptions);
-		}
-
-		async void onNewSession(object _)
-		{
-			var connection = await App.Current.AskForConnectionAsync();
-			if (connection != null)
-				App.Current.MakeWindowForConnection(connection);
-		}
-
-		async void onReopenSession(object _)
-		{
-			try
-			{
-				var connection = await App.Current.MakeConnectionAsync(settings, App.DefaultTerminalCols, App.DefaultTerminalRows);
-				App.Current.MakeWindowForConnection(connection);
-			}
-			catch (ConnectException ex)
-			{
-				Error?.Invoke(this, new ErrorEventArgs(ex.Message));
-			}
-		}
-
-		void onTransferFiles(object _)
-		{
-
-		}
-
-		void onExitCommand(object _)
-		{
-			App.Current.Shutdown();
-		}
-
-		void onOptions(object _)
-		{
-
-		}
 
 		public void Connect(IStreamNotifier notifier, ShellStream stream, ConnectionSettings settings)
 		{
@@ -314,7 +257,7 @@ namespace ScriptRemote.Wpf
 			this.stream = stream;
 			var terminal = new XtermTerminal(notifier)
 			{
-				Size = new Point(App.DefaultTerminalCols, App.DefaultTerminalRows),
+				Size = new Point(CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows),
 				DefaultFont = new TerminalFont()
 				{
 					Foreground = TerminalColors.GetBasicColor(7)

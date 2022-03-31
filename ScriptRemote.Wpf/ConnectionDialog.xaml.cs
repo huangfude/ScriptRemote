@@ -1,5 +1,7 @@
 ﻿using MahApps.Metro.Controls;
 using Renci.SshNet;
+using ScriptRemote.Core.Common;
+using ScriptRemote.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,36 +25,12 @@ using System.Xml.XPath;
 
 namespace ScriptRemote.Wpf
 {
-	public class ConnectionSettings
-	{
-		public string ConnectName
-		{ get; set; }
-
-		public string ServerAddress
-		{ get; set; }
-
-		public int ServerPort
-		{ get; set; }
-
-		public string Username
-		{ get; set; }
-
-		public string Password
-		{ get; set; }
-
-		public string KeyFilePath
-		{ get; set; }
-
-		public string KeyFilePassphrase
-		{ get; set; }
-	}
 
 	/// <summary>
 	/// Interaction logic for ConnectionDialog.xaml
 	/// </summary>
 	public partial class ConnectionDialog : MetroWindow
 	{
-		const string configPath = "connect.cfg";
 
 		public ConnectionSettings SelectedSettings
 		{
@@ -60,6 +38,7 @@ namespace ScriptRemote.Wpf
 			{
 				return new ConnectionSettings()
 				{
+					Id = Id,
 					ConnectName = ConnectName,
 					ServerAddress = ServerAddress,
 					ServerPort = ServerPort,
@@ -68,6 +47,17 @@ namespace ScriptRemote.Wpf
 					KeyFilePath = KeyFilePath,
 					KeyFilePassphrase = KeyFilePassphrase,
 				};
+			}
+		}
+
+		public int Id 
+		{
+			get
+			{
+				int _id;
+				if (int.TryParse(id.Text, out _id))
+					return _id;
+				return 0; 
 			}
 		}
 
@@ -100,116 +90,22 @@ namespace ScriptRemote.Wpf
 		public string KeyFilePassphrase
 		{ get { return keyPassphrase.Password; } }
 
-		public ObservableCollection<ConnectionSettings> SavedSettings = new ObservableCollection<ConnectionSettings>();
-
-		public Connection Connection
-		{ get; private set; }
-
-		public bool? Ok
-		{ get; private set; }
+		public int Sort
+		{
+			get
+			{
+				int _sort;
+				if (int.TryParse(sort.Text, out _sort))
+					return _sort;
+				return 0;
+			}
+		}
 
 		public ConnectionDialog()
 		{
-			DataContext = this;
-
 			InitializeComponent();
 
 			Loaded += (sender, e) => { MinHeight = ActualHeight; MaxHeight = ActualHeight; };
-
-			settingsList.ItemsSource = SavedSettings;
-
-			var store = IsolatedStorageFile.GetUserStoreForAssembly();
-			if (store.FileExists(configPath))
-			{
-				try
-				{
-					using (var reader = new StreamReader(store.OpenFile(configPath, FileMode.Open)))
-					{
-						var document = XDocument.Load(reader);
-
-						foreach (var settingsElement in document.XPathSelectElements("/Settings/Connection"))
-						{
-							var settings = new ConnectionSettings();
-							string rawConnectName = settingsElement.XPathSelectElement("ConnectName")?.Value;
-							if (rawConnectName != null)
-								settings.ConnectName = rawConnectName;
-
-							string rawServerAddress = settingsElement.XPathSelectElement("ServerAddress")?.Value;
-							if (rawServerAddress != null)
-								settings.ServerAddress = rawServerAddress;
-
-							string rawServerPort = settingsElement.XPathSelectElement("ServerPort")?.Value;
-							if (rawServerPort != null)
-							{
-								int serverPort = 0;
-								int.TryParse(rawServerPort, out serverPort);
-								settings.ServerPort = serverPort;
-							}
-
-							string rawUsername = settingsElement.XPathSelectElement("Username")?.Value;
-							if (rawUsername != null)
-								settings.Username = rawUsername;
-
-							string rawPassword = settingsElement.XPathSelectElement("Password")?.Value;
-							if (rawPassword != null)
-								settings.Password = rawPassword;
-
-							string rawKeyFilePath = settingsElement.XPathSelectElement("KeyFilePath")?.Value;
-							if (rawKeyFilePath != null)
-								settings.KeyFilePath = rawKeyFilePath;
-
-							SavedSettings.Add(settings);
-						}
-					}
-
-					if (SavedSettings.Count > 0)
-						settingsList.SelectedIndex = 0;
-				}
-				catch (Exception ex) when (ex is IOException || ex is XmlException)
-				{
-					MessageBox.Show(this, "Could not access your saved settings.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-				}
-            }
-		}
-
-		protected override void OnClosed(EventArgs e)
-		{
-			base.OnClosed(e);
-		}
-
-		/// <summary>
-		/// 保存链接信息
-		/// </summary>
-		protected void OnSave()
-		{
-			var store = IsolatedStorageFile.GetUserStoreForAssembly();
-			try
-			{
-				var document = new XDocument();
-				var root = new XElement(XName.Get("Settings"));
-				document.Add(root);
-				foreach (var settings in SavedSettings)
-				{
-					var connection = new XElement(XName.Get("Connection"));
-					root.Add(connection);
-
-					connection.Add(new XElement(XName.Get("ConnectName"), settings.ConnectName));
-					connection.Add(new XElement(XName.Get("ServerAddress"), settings.ServerAddress));
-					connection.Add(new XElement(XName.Get("ServerPort"), settings.ServerPort));
-					connection.Add(new XElement(XName.Get("Username"), settings.Username));
-					connection.Add(new XElement(XName.Get("Password"), settings.Password));
-					connection.Add(new XElement(XName.Get("KeyFilePath"), settings.KeyFilePath));
-				}
-
-				using (var writer = XmlWriter.Create(store.OpenFile(configPath, FileMode.Create)))
-				{
-					document.WriteTo(writer);
-				}
-			}
-			catch (IOException)
-			{
-				MessageBox.Show(this, "Could not access your saved settings.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			}
 		}
 
 		 
@@ -231,9 +127,9 @@ namespace ScriptRemote.Wpf
 			string userName = SelectedSettings.Username;
 			string address = SelectedSettings.ServerAddress;
 			string conName = SelectedSettings.ConnectName;
-			if(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(address))
+			if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(address))
             {
-				displayError("Address or Username can not be empty", "Error");
+				App.Current.DisplayError("Address or Username can not be empty", "Error");
 				return;
             }
 			if(string.IsNullOrEmpty(conName))
@@ -241,75 +137,58 @@ namespace ScriptRemote.Wpf
 				// 控件赋值
 				connectName.Text = userName + "@" + address;
 			}
-			SavedSettings.Add(SelectedSettings);
-			settingsList.SelectedIndex = settingsList.Items.Count - 1;
 
-			OnSave();
+			if(SelectedSettings.Id > 0)
+            {
+				SettingsUtil.OnUpdate(SelectedSettings);
+			} 
+			else
+            {
+				SettingsUtil.OnSave(SelectedSettings);
+			}
+
+			MainWindow mainwin = (MainWindow)Application.Current.MainWindow;
+			mainwin.settingsList.ItemsSource = SettingsUtil.List();
+
+			// 退出
+			Close();
 		}
 
 		private void close_Click(object sender, RoutedEventArgs e)
 		{
-			// 保存记录
-			OnSave();
 			// 退出
-			Ok = false;
 			Close();
 		}
 
-		void displayError(string message, string title)
+		public void SettingsEdit(ConnectionSettings settings)
 		{
-			MessageBox.Show(this, message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+			connectName.Text = settings.ConnectName;
+			serverAddress.Text = settings.ServerAddress;
+			serverPort.Text = settings.ServerPort.ToString();
+			username.Text = settings.Username;
+			//password.Clear();
+			password.Password = settings.Password;
+			keyPath.Text = settings.KeyFilePath;
+			keyPassphrase.Clear();
+
+			//隐藏
+			id.Text = settings.Id.ToString();
+			sort.Text = settings.Sort.ToString();
+
+			if (connectName.Text == "")
+				connectName.Focus();
+			if (serverAddress.Text == "")
+				serverAddress.Focus();
+			else if (serverPort.Text == "")
+				serverPort.Focus();
+			else if (username.Text == "")
+				username.Focus();
+			else if (keyPath.Text == "")
+				password.Focus();
+			else
+				keyPassphrase.Focus();
+			
 		}
-
-		async void connect_Click(object sender, RoutedEventArgs e)
-		{
-			IsEnabled = false;
-
-			try
-			{
-				Connection = await App.Current.MakeConnectionAsync(SelectedSettings, App.DefaultTerminalCols, App.DefaultTerminalRows);
-				Ok = true;
-				Close();
-			}
-			catch (ConnectException ex)
-			{
-				IsEnabled = true;
-				displayError(ex.Message, "Could not connect");
-			}
-		}
-
-		private void settingsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-		{
-			if (e.AddedItems.Count > 0)
-			{
-				var settings = e.AddedItems[0] as ConnectionSettings;	// Let an exception happen if the items are not ConnectionSettings
-				connectName.Text = settings.ConnectName;
-				serverAddress.Text = settings.ServerAddress;
-				serverPort.Text = settings.ServerPort.ToString();
-				username.Text = settings.Username;
-				//password.Clear();
-				password.Password = settings.Password;
-				keyPath.Text = settings.KeyFilePath;
-				keyPassphrase.Clear();
-
-				if (connectName.Text == "")
-					connectName.Focus();
-				if (serverAddress.Text == "")
-					serverAddress.Focus();
-				else if (serverPort.Text == "")
-					serverPort.Focus();
-				else if (username.Text == "")
-					username.Focus();
-				else if (keyPath.Text == "")
-					password.Focus();
-				else
-					keyPassphrase.Focus();
-			}
-		}
-
-		private void settingsListItem_Delete(object sender, RoutedEventArgs e)
-		{
-			SavedSettings.Remove((sender as MenuItem).Tag as ConnectionSettings);
-		}
+		
 	}
 }

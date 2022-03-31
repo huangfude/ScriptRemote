@@ -681,7 +681,7 @@ namespace ScriptRemote.Terminal.Controls
 							}
 						}
 						else if (atEnd)
-							scrollOwner.ScrollToBottom();
+							scrollOwner?.ScrollToBottom();
 					}
 					else
 					{
