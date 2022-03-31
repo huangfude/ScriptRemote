@@ -1,5 +1,4 @@
-﻿using ScriptRemote.Core.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -41,54 +40,7 @@ namespace ScriptRemote.Wpf
 			MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 
-		/// <summary>
-		/// 保存信息
-		/// </summary>
-		public void OnSave()
-		{
-			var store = IsolatedStorageFile.GetUserStoreForAssembly();
-			try
-			{
-				var document = new XDocument();
-				document.Declaration = new XDeclaration("1.0", "utf-8", null);
-
-				var root = new XElement(XName.Get("Settings"));
-				document.Add(root);
-				foreach (var settings in GlobalVariable.SavedSettings)
-				{
-					var connection = new XElement(XName.Get("Connection"));
-					root.Add(connection);
-
-					connection.Add(new XElement(XName.Get("ConnectName"), settings.ConnectName));
-					connection.Add(new XElement(XName.Get("ServerAddress"), settings.ServerAddress));
-					connection.Add(new XElement(XName.Get("ServerPort"), settings.ServerPort));
-					connection.Add(new XElement(XName.Get("Username"), settings.Username));
-					connection.Add(new XElement(XName.Get("Password"), settings.Password));
-					connection.Add(new XElement(XName.Get("KeyFilePath"), settings.KeyFilePath));
-				}
-
-
-				lock (_writeLock)
-				{
-					if(store.FileExists(CommonConst.configPath))
-                    {
-						store.DeleteFile(CommonConst.configPath);
-					}
-
-					using (var isoStream = new IsolatedStorageFileStream(CommonConst.configPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, store))
-					{
-						using (var writer = XmlWriter.Create(isoStream))
-						{
-							document.WriteTo(writer);
-						}
-					}
-				}
-			}
-			catch (IOException)
-			{
-				DisplayError("Could not access your saved settings.", "Error");
-			}
-		}
+		
 
 	}
 }

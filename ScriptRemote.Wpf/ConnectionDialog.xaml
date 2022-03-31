@@ -37,6 +37,9 @@
                 <TextBox x:Name="serverAddress" Width="150" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"/>
                 <Label Content="Port" Target="{Binding ElementName=serverPort}" Grid.Row="4" Grid.Column="0" Padding="0,0,5,0"/>
                 <TextBox x:Name="serverPort" Width="50" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left"/>
+                <!-- 隐藏控件-->
+                <TextBox x:Name="id" Visibility="Hidden" />
+                <TextBox x:Name="sort" Visibility="Hidden" />
             </Grid>
                     
         </GroupBox>

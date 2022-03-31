@@ -1,6 +1,7 @@
 ﻿using MahApps.Metro.Controls;
 using Renci.SshNet;
 using ScriptRemote.Core.Common;
+using ScriptRemote.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -37,6 +38,7 @@ namespace ScriptRemote.Wpf
 			{
 				return new ConnectionSettings()
 				{
+					Id = Id,
 					ConnectName = ConnectName,
 					ServerAddress = ServerAddress,
 					ServerPort = ServerPort,
@@ -45,6 +47,17 @@ namespace ScriptRemote.Wpf
 					KeyFilePath = KeyFilePath,
 					KeyFilePassphrase = KeyFilePassphrase,
 				};
+			}
+		}
+
+		public int Id 
+		{
+			get
+			{
+				int _id;
+				if (int.TryParse(id.Text, out _id))
+					return _id;
+				return 0; 
 			}
 		}
 
@@ -77,11 +90,19 @@ namespace ScriptRemote.Wpf
 		public string KeyFilePassphrase
 		{ get { return keyPassphrase.Password; } }
 
+		public int Sort
+		{
+			get
+			{
+				int _sort;
+				if (int.TryParse(sort.Text, out _sort))
+					return _sort;
+				return 0;
+			}
+		}
 
 		public ConnectionDialog()
 		{
-			DataContext = this;
-
 			InitializeComponent();
 
 			Loaded += (sender, e) => { MinHeight = ActualHeight; MaxHeight = ActualHeight; };
@@ -106,7 +127,7 @@ namespace ScriptRemote.Wpf
 			string userName = SelectedSettings.Username;
 			string address = SelectedSettings.ServerAddress;
 			string conName = SelectedSettings.ConnectName;
-			if(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(address))
+			if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(address))
             {
 				App.Current.DisplayError("Address or Username can not be empty", "Error");
 				return;
@@ -116,8 +137,19 @@ namespace ScriptRemote.Wpf
 				// 控件赋值
 				connectName.Text = userName + "@" + address;
 			}
-			GlobalVariable.SavedSettings.Add(SelectedSettings);
-			App.Current.OnSave();
+
+			if(SelectedSettings.Id > 0)
+            {
+				SettingsUtil.OnUpdate(SelectedSettings);
+			} 
+			else
+            {
+				SettingsUtil.OnSave(SelectedSettings);
+			}
+
+			MainWindow mainwin = (MainWindow)Application.Current.MainWindow;
+			mainwin.settingsList.ItemsSource = SettingsUtil.List();
+
 			// 退出
 			Close();
 		}
@@ -138,6 +170,10 @@ namespace ScriptRemote.Wpf
 			password.Password = settings.Password;
 			keyPath.Text = settings.KeyFilePath;
 			keyPassphrase.Clear();
+
+			//隐藏
+			id.Text = settings.Id.ToString();
+			sort.Text = settings.Sort.ToString();
 
 			if (connectName.Text == "")
 				connectName.Focus();

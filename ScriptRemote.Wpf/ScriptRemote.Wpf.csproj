@@ -5,11 +5,16 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Huang.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Huang.jpg" />
     <None Remove="Huang.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Huang.ico" />
   </ItemGroup>
 
   <ItemGroup>

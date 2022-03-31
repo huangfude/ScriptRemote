@@ -18,6 +18,8 @@ using System.Windows.Shapes;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using ScriptRemote.Core.Utils;
+using System.Collections.ObjectModel;
 
 namespace ScriptRemote.Wpf
 {
@@ -29,68 +31,84 @@ namespace ScriptRemote.Wpf
 
 		int lastClickTimestamp = 1000;
 
+		private Point _dragStartPoint;
+
 		public MainWindow()
         {
-            DataContext = this;
-
             InitializeComponent();
 
-			settingsList.ItemsSource = GlobalVariable.SavedSettings;
+			// 判断数据库文件是否存在
+			if (File.Exists(GlobalVariable.dbpath))
+            {
+				settingsList.ItemsSource = SettingsUtil.List();
 
-			var store = IsolatedStorageFile.GetUserStoreForAssembly();
-			if (store.FileExists(CommonConst.configPath))
+				settingsList.PreviewMouseMove += ListBox_PreviewMouseMove;
+
+				Style itemContainerStyle = new Style(typeof(ListBoxItem));
+				itemContainerStyle.Setters.Add(new Setter(AllowDropProperty, true));
+				itemContainerStyle.Setters.Add(new EventSetter(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(ListBoxItem_PreviewMouseLeftButtonDown)));
+				itemContainerStyle.Setters.Add(new EventSetter(DropEvent, new DragEventHandler(ListBoxItem_Drop)));
+				settingsList.ItemContainerStyle = itemContainerStyle;
+				settingsList.SelectedIndex = 0;
+			} 
+			else
+            {
+				// 创建
+				SettingsUtil.OnCreate();
+			}
+			
+		}
+		private T FindVisualParent<T>(DependencyObject child)
+			where T : DependencyObject
+		{
+			var parentObject = VisualTreeHelper.GetParent(child);
+			if (parentObject == null)
+				return null;
+			T parent = parentObject as T;
+			if (parent != null)
+				return parent;
+			return FindVisualParent<T>(parentObject);
+		}
+
+		private void ListBox_PreviewMouseMove(object sender, MouseEventArgs e)
+		{
+			Point point = e.GetPosition(null);
+			Vector diff = _dragStartPoint - point;
+			if (e.LeftButton == MouseButtonState.Pressed &&
+				(Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+					Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
 			{
-				try
+				var lb = sender as ListBox;
+				var lbi = FindVisualParent<ListBoxItem>(((DependencyObject)e.OriginalSource));
+				if (lbi != null)
 				{
-					using (var reader = new StreamReader(store.OpenFile(CommonConst.configPath, FileMode.Open)))
-					{
-						var document = XDocument.Load(reader, LoadOptions.PreserveWhitespace);
-
-						foreach (var settingsElement in document.XPathSelectElements("/Settings/Connection"))
-						{
-							var settings = new ConnectionSettings();
-
-							string rawConnectName = settingsElement.XPathSelectElement("ConnectName")?.Value;
-							if (rawConnectName != null)
-								settings.ConnectName = rawConnectName;
-
-							string rawServerAddress = settingsElement.XPathSelectElement("ServerAddress")?.Value;
-							if (rawServerAddress != null)
-								settings.ServerAddress = rawServerAddress;
-
-							string rawServerPort = settingsElement.XPathSelectElement("ServerPort")?.Value;
-							if (rawServerPort != null)
-							{
-								int serverPort = 0;
-								int.TryParse(rawServerPort, out serverPort);
-								settings.ServerPort = serverPort;
-							}
-
-							string rawUsername = settingsElement.XPathSelectElement("Username")?.Value;
-							if (rawUsername != null)
-								settings.Username = rawUsername;
-
-							string rawPassword = settingsElement.XPathSelectElement("Password")?.Value;
-							if (rawPassword != null)
-								settings.Password = rawPassword;
-
-							string rawKeyFilePath = settingsElement.XPathSelectElement("KeyFilePath")?.Value;
-							if (rawKeyFilePath != null)
-								settings.KeyFilePath = rawKeyFilePath;
-
-							GlobalVariable.SavedSettings.Add(settings);
-						}
-					}
-
-					if (GlobalVariable.SavedSettings.Count > 0)
-						settingsList.SelectedIndex = 0;
-				}
-				catch (Exception ex) when (ex is IOException || ex is XmlException)
-				{
-					App.Current.DisplayError(ex.Message, "Error");
+					DragDrop.DoDragDrop(lbi, lbi.DataContext, DragDropEffects.Move);
 				}
 			}
 		}
+		private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			_dragStartPoint = e.GetPosition(null);
+		}
+
+		private void ListBoxItem_Drop(object sender, DragEventArgs e)
+		{
+			if (sender is ListBoxItem)
+			{
+				var source = e.Data.GetData(typeof(ConnectionSettings)) as ConnectionSettings;
+				var target = ((ListBoxItem)(sender)).DataContext as ConnectionSettings;
+
+				//int sourceIndex = settingsList.Items.IndexOf(source);
+				//int targetIndex = settingsList.Items.IndexOf(target);
+
+				// 互换
+				SettingsUtil.OnUpdateSort(source.Id, target.Sort);
+				SettingsUtil.OnUpdateSort(target.Id, source.Sort);
+
+				settingsList.ItemsSource = SettingsUtil.List();
+			}
+		}
+
 
 		internal async Task<Connection> MakeConnectionAsync(ConnectionSettings settings, int terminalCols, int terminalRows)
 		{
@@ -126,16 +144,17 @@ namespace ScriptRemote.Wpf
 
 		private void settingsListItem_Edit(object sender, RoutedEventArgs e)
 		{
+			ConnectionSettings settings = (sender as MenuItem).Tag as ConnectionSettings;
 			var dialog = new ConnectionDialog();
-			dialog.SettingsEdit((sender as MenuItem).Tag as ConnectionSettings);
+			dialog.SettingsEdit(settings);
 			dialog.ShowDialog();
 		}
 
 		private void settingsListItem_Delete(object sender, RoutedEventArgs e)
 		{
-			GlobalVariable.SavedSettings.Remove((sender as MenuItem).Tag as ConnectionSettings);
-			// 保存信息
-			App.Current.OnSave();
+			ConnectionSettings settings = (sender as MenuItem).Tag as ConnectionSettings;
+			SettingsUtil.OnDelete(settings.Id);
+			settingsList.ItemsSource = SettingsUtil.List();
 		}
 
 		
@@ -148,28 +167,36 @@ namespace ScriptRemote.Wpf
 				TextBlock textBlock = sender as TextBlock;
 
 				ConnectionSettings SelectedSettings = textBlock.Tag as ConnectionSettings;
-				Connection connection = await MakeConnectionAsync(SelectedSettings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
 
-				// 添加TabItem
-				TabItem tabItem = new TabItem();
-				tabItem.Header = textBlock.Text;
+				try
+				{
+					Connection connection = await MakeConnectionAsync(SelectedSettings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
+					
+					// 添加TabItem
+					TabItem tabItem = new TabItem();
+					tabItem.Header = textBlock.Text;
 
-				// 添加TabItem的内容
-				TerminalTabControl terminalTab = new TerminalTabControl();
-				terminalTab.Height = tabControl.ActualHeight;
-				terminalTab.Width = tabControl.ActualWidth;
-				// 连接
-				terminalTab.Connect(connection.Stream, connection.Settings);
+					// 添加TabItem的内容
+					TerminalTabControl terminalTab = new TerminalTabControl();
+					terminalTab.Height = tabControl.ActualHeight;
+					terminalTab.Width = tabControl.ActualWidth;
+					// 连接
+					terminalTab.Connect(connection.Stream, connection.Settings);
 
-				tabItem.Content = terminalTab;
-				// 设置选中
-				tabItem.IsSelected = true;
-				tabItem.IsVisibleChanged += terminalTab.this_IsVisibleChanged;
+					tabItem.Content = terminalTab;
+					// 设置选中
+					tabItem.IsSelected = true;
+					tabItem.IsVisibleChanged += terminalTab.this_IsVisibleChanged;
 
-				tabControl.SizeChanged += terminalTab.this_SizeChanged;
+					tabControl.SizeChanged += terminalTab.this_SizeChanged;
 
-				//添加到TabControl
-				tabControl.Items.Add(tabItem);
+					//添加到TabControl
+					tabControl.Items.Add(tabItem);
+				}
+				catch (ConnectException ex)
+				{
+					App.Current.DisplayError(ex.Message, "Could not connect");
+				}
 			}
 
 			lastClickTimestamp = e.Timestamp;

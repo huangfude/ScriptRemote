@@ -25,8 +25,9 @@ namespace ScriptRemote.Core.Common
     /// </summary>
     public static class GlobalVariable
     {
-        // 配置
-        public static ObservableCollection<ConnectionSettings> SavedSettings = new ObservableCollection<ConnectionSettings>();
+
+        // 数据库文件
+        public static string dbpath = AppDomain.CurrentDomain.BaseDirectory + "connect.db";
 
     }
 

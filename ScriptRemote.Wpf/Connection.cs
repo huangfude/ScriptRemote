@@ -67,7 +67,7 @@ namespace ScriptRemote.Wpf
 						authentications.Add(new PrivateKeyAuthenticationMethod(settings.Username, privateKeyFile));
 					}
 					authentications.Add(new PasswordAuthenticationMethod(settings.Username, settings.Password));
-					ConnectionInfo connectionInfo = new ConnectionInfo(settings.ServerAddress, settings.ServerPort, settings.Username, authentications.ToArray());
+					ConnectionInfo connectionInfo = new ConnectionInfo(settings.ServerAddress, Convert.ToInt32(settings.ServerPort), settings.Username, authentications.ToArray());
 
 					Client = new SshClient(connectionInfo);
 					Client.Connect();
