@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:term="clr-namespace:ScriptRemote.Terminal.Controls;assembly=ScriptRemote.Terminal.Controls"
         xmlns:local="clr-namespace:ScriptRemote.Wpf"
         mc:Ignorable="d"
-        WindowStartupLocation="CenterScreen" 
-        Icon="/Huang.png" Title="ScriptRemote App" Height="620" Width="1000">
+        Icon="/Huang.png" Title="ScriptRemote App"
+        Height="620" Width="1000" Loaded="MetroWindow_Loaded">
     
     <Window.Resources>
         <DataTemplate x:Key="ConnectionItemTemplate">
@@ -43,17 +44,18 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Margin="10" >
+                <!--
                 <TextBlock Margin="5"
                            FontSize="14"
                            Text="Sessions" />
+                -->
                 <Separator Background="#11FFFFFF" />
                 <ListBox x:Name="settingsList" SelectionMode="Single"
                      ItemTemplate="{DynamicResource ConnectionItemTemplate}">
                     <!--
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             <Setter Property="VerticalContentAlignment" Value="Stretch"/>
                         </Style>
                     </ListBox.ItemContainerStyle>
@@ -62,6 +64,14 @@
             </StackPanel>
 
             <TabControl x:Name="tabControl" Grid.Column="1" Margin="0 10 0 0" TabStripPlacement="Top">
+                <!--
+                <TabItem Header="terminal">
+                    <term:TerminalControl x:Name="terminalControl" FontFamily="Consolas" Focusable="True" FocusVisualStyle="{x:Null}" 
+                                FontSize="13" Background="Black" Width="Auto" Height="Auto"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SnapsToDevicePixels="True">
+                    </term:TerminalControl>
+                </TabItem>
+                -->
             </TabControl>
         </Grid>
 

@@ -8,7 +8,7 @@ namespace ScriptRemote.Core.Common
 {
 	public class ConnectionSettings
 	{
-		public Int64 Id
+		public long Id
 		{ get; set; }
 
 		public string ConnectName
@@ -17,7 +17,7 @@ namespace ScriptRemote.Core.Common
 		public string ServerAddress
 		{ get; set; }
 
-		public Int64 ServerPort
+		public long ServerPort
 		{ get; set; }
 
 		public string Username
@@ -32,7 +32,7 @@ namespace ScriptRemote.Core.Common
 		public string KeyFilePassphrase
 		{ get; set; }
 
-		public Int64 Sort
+		public long Sort
 		{ get; set; }
 	}
 

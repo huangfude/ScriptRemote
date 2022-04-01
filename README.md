@@ -6,6 +6,6 @@
 ## 开发环境
 
 - Visual Studio 2022
-- .Net 6.0
+- .Net >= 4.8
 	
 

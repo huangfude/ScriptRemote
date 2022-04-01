@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScriptRemote.Wpf", "ScriptR
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScriptRemote.Core", "ScriptRemote.Core\ScriptRemote.Core.csproj", "{658327DD-83DB-45D0-BF4E-0F285CEB32AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptRemote.Terminal.Controls", "ScriptRemote.Terminal.Controls\ScriptRemote.Terminal.Controls.csproj", "{90117F64-0126-4531-B696-78EB77C19038}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScriptRemote.Terminal.Controls", "ScriptRemote.Terminal.Controls\ScriptRemote.Terminal.Controls.csproj", "{90117F64-0126-4531-B696-78EB77C19038}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

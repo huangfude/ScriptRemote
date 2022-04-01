@@ -20,6 +20,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using ScriptRemote.Core.Utils;
 using System.Collections.ObjectModel;
+using ScriptRemote.Terminal.Controls;
 
 namespace ScriptRemote.Wpf
 {
@@ -48,7 +49,11 @@ namespace ScriptRemote.Wpf
 				itemContainerStyle.Setters.Add(new Setter(AllowDropProperty, true));
 				itemContainerStyle.Setters.Add(new EventSetter(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(ListBoxItem_PreviewMouseLeftButtonDown)));
 				itemContainerStyle.Setters.Add(new EventSetter(DropEvent, new DragEventHandler(ListBoxItem_Drop)));
+				// 铺满
+				itemContainerStyle.Setters.Add(new Setter(HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+				itemContainerStyle.Setters.Add(new Setter(VerticalContentAlignmentProperty, VerticalAlignment.Stretch));
 				settingsList.ItemContainerStyle = itemContainerStyle;
+				// 默认选中第一个
 				settingsList.SelectedIndex = 0;
 			} 
 			else
@@ -165,33 +170,35 @@ namespace ScriptRemote.Wpf
 			{
 				// 鼠标左键双击
 				TextBlock textBlock = sender as TextBlock;
+				
+				// 添加TabItem
+				TabItem tabItem = new TabItem();
+				tabItem.Header = textBlock.Text;
+				
+				// 添加TabItem的内容
+				TerminalTabControl terminalTab = new TerminalTabControl();
+				tabItem.Content = terminalTab;
+				// 设置选中
+				tabItem.IsSelected = true;
+				
+				tabItem.IsVisibleChanged += terminalTab.this_IsVisibleChanged;
+				tabItem.GotKeyboardFocus += terminalTab.OnKeyboardFocus;
 
-				ConnectionSettings SelectedSettings = textBlock.Tag as ConnectionSettings;
+				tabControl.SizeChanged += terminalTab.this_SizeChanged;
+				//添加到TabControl
+				tabControl.Items.Add(tabItem);
 
 				try
 				{
-					Connection connection = await MakeConnectionAsync(SelectedSettings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
-					
-					// 添加TabItem
-					TabItem tabItem = new TabItem();
-					tabItem.Header = textBlock.Text;
-
-					// 添加TabItem的内容
-					TerminalTabControl terminalTab = new TerminalTabControl();
-					terminalTab.Height = tabControl.ActualHeight;
-					terminalTab.Width = tabControl.ActualWidth;
+					ConnectionSettings SelectedSettings = textBlock.Tag as ConnectionSettings;
 					// 连接
+					Connection connection = await MakeConnectionAsync(SelectedSettings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
 					terminalTab.Connect(connection.Stream, connection.Settings);
 
-					tabItem.Content = terminalTab;
-					// 设置选中
-					tabItem.IsSelected = true;
-					tabItem.IsVisibleChanged += terminalTab.this_IsVisibleChanged;
-
-					tabControl.SizeChanged += terminalTab.this_SizeChanged;
-
-					//添加到TabControl
-					tabControl.Items.Add(tabItem);
+					// 重置大小
+					terminalTab.TerminalChangSize(tabControl.ActualWidth, tabControl.ActualHeight);
+					tabItem.Focus();
+					
 				}
 				catch (ConnectException ex)
 				{
@@ -213,6 +220,18 @@ namespace ScriptRemote.Wpf
 			dialog.ShowDialog();
 		}
 
-        
+        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+			// 屏幕整体宽度
+			double x = SystemParameters.PrimaryScreenWidth;
+			// 屏幕整体高度
+			double y = SystemParameters.PrimaryScreenHeight;
+
+			Width = x * 0.8;
+			Height = y * 0.8;
+
+			Left = 100;
+			Top = 100;
+		}
     }
 }

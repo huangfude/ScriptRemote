@@ -7,15 +7,12 @@
              xmlns:local="clr-namespace:ScriptRemote.Wpf"
              xmlns:term="clr-namespace:ScriptRemote.Terminal.Controls;assembly=ScriptRemote.Terminal.Controls"
              FocusManager.FocusedElement="{Binding ElementName=terminalControl}" 
-             GotKeyboardFocus="OnKeyboardFocus"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid x:Name="terminalGrid">
         
         <term:TerminalControl x:Name="terminalControl" FontFamily="Consolas" Focusable="True" FocusVisualStyle="{x:Null}" 
                                 FontSize="13" Background="Black" Width="Auto" Height="Auto"
                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SnapsToDevicePixels="True">
         </term:TerminalControl>
         
-    </Grid>
 </UserControl>
