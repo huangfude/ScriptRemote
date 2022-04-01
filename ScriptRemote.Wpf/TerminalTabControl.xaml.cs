@@ -34,17 +34,7 @@ namespace ScriptRemote.Wpf
 			viewModel = new TerminalViewModel();
 			DataContext = viewModel;
 
-			viewModel.Error += ViewModel_Error;
-
 			//SizeChanged += this_SizeChanged;
-
-			//Loaded += this_Loaded;
-
-		}
-
-		private void ViewModel_Error(object sender, ErrorEventArgs e)
-		{
-			MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 
 		public void Connect(ShellStream stream, ConnectionSettings settings)
@@ -61,7 +51,6 @@ namespace ScriptRemote.Wpf
 
 			terminalControl.Terminal = viewModel.Terminal;
 		}
-
 
 		public void this_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -96,7 +85,11 @@ namespace ScriptRemote.Wpf
 				Height = height;
 			}
 
+			TerminalChangSize(width, height);
+		}
 
+		public void TerminalChangSize(double width, double height)
+        {
 			//var transformer = PresentationSource.FromVisual(terminalControl).CompositionTarget.TransformToDevice;
 			//var stops = transformer.Transform(new System.Windows.Point(terminalControl.CharWidth, terminalControl.CharHeight));
 			double horizontalStop = terminalControl.CharWidth;
@@ -109,25 +102,13 @@ namespace ScriptRemote.Wpf
 			viewModel.ChangeSize(newCols, newRows);
 		}
 
-		public void this_Loaded(object sender, RoutedEventArgs e)
-		{
-			var content = terminalGrid;
-
-			InvalidateMeasure();
-			var contentDesired = terminalControl.TerminalSize;
-
-			Width = contentDesired.Width + ActualWidth - content.ActualWidth;
-			Height = contentDesired.Height + ActualHeight - content.ActualHeight;
-		}
-
-
 		public void OnKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
 		{
-			if (e.NewFocus == this)
-			{
+			//if (e.NewFocus == this)
+			//{
 				terminalControl.Focus();
 				Keyboard.Focus(terminalControl);
-			}
+			//}
 		}
 	}
 }
