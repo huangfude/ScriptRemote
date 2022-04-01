@@ -105,7 +105,7 @@ namespace ScriptRemote.Wpf
 		{
 			InitializeComponent();
 
-			Loaded += (sender, e) => { MinHeight = ActualHeight; MaxHeight = ActualHeight; };
+			//Loaded += (sender, e) => { MinHeight = ActualHeight; MaxHeight = ActualHeight; };
 		}
 
 		 
@@ -189,6 +189,12 @@ namespace ScriptRemote.Wpf
 				keyPassphrase.Focus();
 			
 		}
-		
-	}
+
+        private void macroAdd_Click(object sender, RoutedEventArgs e)
+        {
+			macroStackPanel.Children.Add(new MacroControl());
+		}
+
+       
+    }
 }

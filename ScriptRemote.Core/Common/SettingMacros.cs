@@ -6,15 +6,21 @@ using System.Threading.Tasks;
 
 namespace ScriptRemote.Core.Common
 {
-    public class SettingMacro
+    public class SettingMacros
     {
         public long Id
+        { get; set; }
+
+        /// <summary>
+        /// Setting配置关联的Id
+        /// </summary>
+        public long SettingId
         { get; set; }
 
         public string Pattern
         { get; set; }
 
-        public string Macro
+        public string Command
         { get; set; }
     }
 }

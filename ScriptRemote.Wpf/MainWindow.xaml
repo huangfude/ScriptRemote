@@ -15,6 +15,7 @@
             <StackPanel Margin="0,5,0,5">
                 <StackPanel.ContextMenu>
                     <ContextMenu>
+                        <MenuItem Header="Connect" Click="settingsListItem_Connect" Tag="{Binding }"></MenuItem>
                         <MenuItem Header="Edit" Click="settingsListItem_Edit" Tag="{Binding }"></MenuItem>
                         <MenuItem Header="Delete" Click="settingsListItem_Delete" Tag="{Binding }"></MenuItem>
                     </ContextMenu>
@@ -26,7 +27,7 @@
     <DockPanel>
         
         <Menu x:Name="menu" 
-              Margin="5,5,0,0" DockPanel.Dock="Top" SnapsToDevicePixels="True">
+              Margin="10,5,0,0" DockPanel.Dock="Top" SnapsToDevicePixels="True">
             <MenuItem Header="_File">
                 <MenuItem Header="_New Session..." Click="MenuItem_Click_New" />
                 <Separator/>

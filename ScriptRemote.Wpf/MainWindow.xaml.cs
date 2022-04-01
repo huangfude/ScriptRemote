@@ -9,18 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.XPath;
 using ScriptRemote.Core.Utils;
-using System.Collections.ObjectModel;
-using ScriptRemote.Terminal.Controls;
 
 namespace ScriptRemote.Wpf
 {
@@ -38,29 +29,25 @@ namespace ScriptRemote.Wpf
         {
             InitializeComponent();
 
-			// 判断数据库文件是否存在
-			if (File.Exists(GlobalVariable.dbpath))
-            {
-				settingsList.ItemsSource = SettingsUtil.List();
+			// 初始化创建settings表
+			SettingsUtil.OnCreate();
+			// 初始化创建macros表
+			MacrosUtil.OnCreate();
 
-				settingsList.PreviewMouseMove += ListBox_PreviewMouseMove;
+			// 读取数据
+			settingsList.ItemsSource = SettingsUtil.List();
+			settingsList.PreviewMouseMove += ListBox_PreviewMouseMove;
 
-				Style itemContainerStyle = new Style(typeof(ListBoxItem));
-				itemContainerStyle.Setters.Add(new Setter(AllowDropProperty, true));
-				itemContainerStyle.Setters.Add(new EventSetter(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(ListBoxItem_PreviewMouseLeftButtonDown)));
-				itemContainerStyle.Setters.Add(new EventSetter(DropEvent, new DragEventHandler(ListBoxItem_Drop)));
-				// 铺满
-				itemContainerStyle.Setters.Add(new Setter(HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
-				itemContainerStyle.Setters.Add(new Setter(VerticalContentAlignmentProperty, VerticalAlignment.Stretch));
-				settingsList.ItemContainerStyle = itemContainerStyle;
-				// 默认选中第一个
-				settingsList.SelectedIndex = 0;
-			} 
-			else
-            {
-				// 创建
-				SettingsUtil.OnCreate();
-			}
+			Style itemContainerStyle = new Style(typeof(ListBoxItem));
+			itemContainerStyle.Setters.Add(new Setter(AllowDropProperty, true));
+			itemContainerStyle.Setters.Add(new EventSetter(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(ListBoxItem_PreviewMouseLeftButtonDown)));
+			itemContainerStyle.Setters.Add(new EventSetter(DropEvent, new DragEventHandler(ListBoxItem_Drop)));
+			// 铺满
+			itemContainerStyle.Setters.Add(new Setter(HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+			itemContainerStyle.Setters.Add(new Setter(VerticalContentAlignmentProperty, VerticalAlignment.Stretch));
+			settingsList.ItemContainerStyle = itemContainerStyle;
+			// 默认选中第一个
+			settingsList.SelectedIndex = 0;
 			
 		}
 		private T FindVisualParent<T>(DependencyObject child)
@@ -114,7 +101,6 @@ namespace ScriptRemote.Wpf
 			}
 		}
 
-
 		internal async Task<Connection> MakeConnectionAsync(ConnectionSettings settings, int terminalCols, int terminalRows)
 		{
 			using (var doneEvent = new System.Threading.ManualResetEvent(false))
@@ -147,6 +133,46 @@ namespace ScriptRemote.Wpf
 			}
 		}
 
+		/// <summary>
+		/// 连接
+		/// </summary>
+		/// <param name="settings"></param>
+		private async void SelectedConnect(ConnectionSettings settings)
+		{
+			// 添加TabItem
+			TabItem tabItem = new TabItem();
+			tabItem.Header = settings.ConnectName;
+
+			// 添加TabItem的内容
+			TerminalTabControl terminalTab = new TerminalTabControl();
+			tabItem.Content = terminalTab;
+			// 设置选中
+			tabItem.IsSelected = true;
+
+			tabItem.IsVisibleChanged += terminalTab.this_IsVisibleChanged;
+			tabItem.GotKeyboardFocus += terminalTab.OnKeyboardFocus;
+
+			tabControl.SizeChanged += terminalTab.this_SizeChanged;
+			//添加到TabControl
+			tabControl.Items.Add(tabItem);
+
+			try
+			{
+				// 连接
+				Connection connection = await MakeConnectionAsync(settings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
+				terminalTab.Connect(connection.Stream, connection.Settings);
+
+				// 重置大小
+				terminalTab.TerminalChangSize(tabControl.ActualWidth, tabControl.ActualHeight);
+				tabItem.Focus();
+
+			}
+			catch (ConnectException ex)
+			{
+				App.Current.DisplayError(ex.Message, "Could not connect");
+			}
+		}
+
 		private void settingsListItem_Edit(object sender, RoutedEventArgs e)
 		{
 			ConnectionSettings settings = (sender as MenuItem).Tag as ConnectionSettings;
@@ -162,51 +188,26 @@ namespace ScriptRemote.Wpf
 			settingsList.ItemsSource = SettingsUtil.List();
 		}
 
-		
 
-		private async void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+		private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
 		{
 			if (e.Timestamp - lastClickTimestamp < 500)
 			{
 				// 鼠标左键双击
 				TextBlock textBlock = sender as TextBlock;
-				
-				// 添加TabItem
-				TabItem tabItem = new TabItem();
-				tabItem.Header = textBlock.Text;
-				
-				// 添加TabItem的内容
-				TerminalTabControl terminalTab = new TerminalTabControl();
-				tabItem.Content = terminalTab;
-				// 设置选中
-				tabItem.IsSelected = true;
-				
-				tabItem.IsVisibleChanged += terminalTab.this_IsVisibleChanged;
-				tabItem.GotKeyboardFocus += terminalTab.OnKeyboardFocus;
-
-				tabControl.SizeChanged += terminalTab.this_SizeChanged;
-				//添加到TabControl
-				tabControl.Items.Add(tabItem);
-
-				try
-				{
-					ConnectionSettings SelectedSettings = textBlock.Tag as ConnectionSettings;
-					// 连接
-					Connection connection = await MakeConnectionAsync(SelectedSettings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
-					terminalTab.Connect(connection.Stream, connection.Settings);
-
-					// 重置大小
-					terminalTab.TerminalChangSize(tabControl.ActualWidth, tabControl.ActualHeight);
-					tabItem.Focus();
-					
-				}
-				catch (ConnectException ex)
-				{
-					App.Current.DisplayError(ex.Message, "Could not connect");
-				}
+				ConnectionSettings selectedSettings = textBlock.Tag as ConnectionSettings;
+				// 连接
+				SelectedConnect(selectedSettings);
 			}
 
 			lastClickTimestamp = e.Timestamp;
+		}
+
+		private void settingsListItem_Connect(object sender, RoutedEventArgs e)
+		{
+			ConnectionSettings settings = (sender as MenuItem).Tag as ConnectionSettings;
+			// 连接
+			SelectedConnect(settings);
 		}
 
 		private void MenuItem_Click_Exit(object sender, RoutedEventArgs e)

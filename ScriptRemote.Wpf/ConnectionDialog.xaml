@@ -16,9 +16,11 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="5"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <GroupBox Header="Server" Grid.Row="0" Padding="5,5,5,5">
+        <GroupBox Header="Server" Grid.Row="0" Padding="5">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -28,14 +30,14 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="Name" Target="{Binding ElementName=connectName}" Grid.Row="0" Grid.Column="0" Padding="0,0,5,0"/>
-                <TextBox x:Name="connectName" Width="150" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" />
-                <Label Content="Address" Target="{Binding ElementName=serverAddress}" Grid.Row="2" Grid.Column="0" Padding="0,0,5,0"/>
+                <Label Content="Name" Grid.Row="0" Grid.Column="0"/>
+                <TextBox x:Name="connectName" Width="150" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left"/>
+                <Label Content="Address" Grid.Row="2" Grid.Column="0"/>
                 <TextBox x:Name="serverAddress" Width="150" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"/>
-                <Label Content="Port" Target="{Binding ElementName=serverPort}" Grid.Row="4" Grid.Column="0" Padding="0,0,5,0"/>
+                <Label Content="Port" Grid.Row="4" Grid.Column="0"/>
                 <TextBox x:Name="serverPort" Width="50" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left"/>
                 <!-- 隐藏控件-->
                 <TextBox x:Name="id" Visibility="Hidden" />
@@ -56,26 +58,36 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Label Content="Username" Target="{Binding ElementName=username}" Grid.Row="0" Grid.Column="0" Padding="0,0,5,0"/>
+                <Label Content="Username" Grid.Row="0" Grid.Column="0" />
                 <TextBox x:Name="username" Width="150" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left"/>
-                <Label Content="Password" Target="{Binding ElementName=password}" Grid.Row="2" Grid.Column="0" Padding="0,0,5,0"/>
+                <Label Content="Password" Grid.Row="2" Grid.Column="0" />
                 <PasswordBox x:Name="password" Width="150" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"/>
-                <Label Content="Key File" Target="{Binding ElementName=keyPath}" Grid.Row="4" Grid.Column="0" Padding="0,0,5,0"/>
+                <Label Content="Key File" Grid.Row="4" Grid.Column="0" />
                 <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left">
                     <TextBox x:Name="keyPath" Width="150"/>
-                    <Button Content="Browse" Width="70" Click="keyPathBrowse_Click" Margin="5,0,0,0"/>
+                    <Button Content="Browse" Width="70" Click="keyPathBrowse_Click" Margin="10,0,0,0"/>
                 </StackPanel>
-                <Label Content="Key Passphrase" Target="{Binding ElementName=keyPassphrase}" Grid.Row="6" Grid.Column="0" Padding="0,0,5,0"/>
+                <Label Content="Key Passphrase" Grid.Row="6" Grid.Column="0" />
                 <PasswordBox x:Name="keyPassphrase" Width="150" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Left"/>
             </Grid>
         </GroupBox>
-        <DockPanel Grid.Row="4" LastChildFill="False">
-            <Button x:Name="saveButton" Content="Save" Width="75" Click="save_Click" DockPanel.Dock="Left"/>
-            <Button x:Name="closeButton" Content="Close" Width="75" Click="close_Click" DockPanel.Dock="Right"/>
+        
+        <GroupBox Header="Macro" Grid.Row="4" Padding="5">
+            <StackPanel x:Name="macroStackPanel" Orientation="Vertical">
+                <Button Content="Add Macro" Margin="10" Width="300" Click="macroAdd_Click" HorizontalAlignment="Left" />
+                <!--
+                <local:MacroControl />
+                -->
+            </StackPanel>
+        </GroupBox>
+        
+        <DockPanel Grid.Row="6" LastChildFill="False" Margin="10">
+            <Button x:Name="saveButton" Content="Save" Width="100" Click="save_Click" DockPanel.Dock="Left"/>
+            <Button x:Name="closeButton" Content="Close" Width="100" Click="close_Click" DockPanel.Dock="Right"/>
         </DockPanel>
     </Grid>
 </mah:MetroWindow>
