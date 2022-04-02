@@ -138,13 +138,33 @@ namespace ScriptRemote.Wpf
 				connectName.Text = userName + "@" + address;
 			}
 
-			if(SelectedSettings.Id > 0)
+			List<SettingMacros> macroList = new List<SettingMacros>();
+			// 查找控件
+			List<TextBox> patternList = ControlUtil.GetChildObjectList<TextBox>(macroStackPanel, "pattern");
+			List<TextBox> commandList = ControlUtil.GetChildObjectList<TextBox>(macroStackPanel, "command");
+            // 遍历
+            for (int i = 0; i < commandList.Count; i++)
+            {
+				SettingMacros macro = new SettingMacros();
+				macro.Pattern = patternList[i].Text;
+				macro.Command = commandList[i].Text;
+				macroList.Add(macro);
+			}
+
+			if (SelectedSettings.Id > 0)
             {
 				SettingsUtil.OnUpdate(SelectedSettings);
+				long Id = SelectedSettings.Id;
+				// 先删除
+				MacrosUtil.OnDeleteBySettingId(Id);
+				// 再保存
+				MacrosUtil.OnSaveList(macroList, Id);
 			} 
 			else
             {
-				SettingsUtil.OnSave(SelectedSettings);
+				long Id = SettingsUtil.OnSave(SelectedSettings);
+				// 保存
+				MacrosUtil.OnSaveList(macroList, Id);
 			}
 
 			MainWindow mainwin = (MainWindow)Application.Current.MainWindow;
@@ -188,6 +208,18 @@ namespace ScriptRemote.Wpf
 			else
 				keyPassphrase.Focus();
 			
+			// id
+			long settingId = Convert.ToInt64(settings.Id);
+			List<SettingMacros> settingMacroList = MacrosUtil.List(settingId);
+			// 遍历
+			foreach (SettingMacros settingMacro in settingMacroList)
+            {
+				MacroControl macroControl = new MacroControl();
+				// 显示值
+				macroControl.pattern.Text = settingMacro.Pattern;
+				macroControl.command.Text = settingMacro.Command;
+				macroStackPanel.Children.Add(macroControl);
+			}
 		}
 
         private void macroAdd_Click(object sender, RoutedEventArgs e)

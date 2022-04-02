@@ -176,7 +176,7 @@ namespace ScriptRemote.Wpf
 	class LoadingShellStreamNotifier : IWindowStreamNotifier
 	{
 		TerminalControl terminal;
-		
+
 		public Stream Stream
 		{ get; }
 
@@ -269,6 +269,29 @@ namespace ScriptRemote.Wpf
 			{
 				Title = e.Title;
 			};
+			// 监听文本变更事件
+			terminal.TextChanged += (sender, e) =>
+			{
+				// 去掉空格符
+				string text = e.Title.Trim();
+				if (!string.IsNullOrEmpty(text))
+                {
+					foreach (SettingMacros macro in settings.settingMacros)
+                    {
+						// 执行一次去除一个
+						string pattern = macro.Pattern;
+                        if (!string.IsNullOrEmpty(pattern) && text.IndexOf(pattern)>-1 && macro.exec)
+                        {
+							System.Diagnostics.Debug.WriteLine("command: " + macro.Command);
+							stream.WriteLine(macro.Command);
+							// 执行一次
+							macro.exec = false;
+						}
+					}
+					
+				}
+			};
+			
 
 			Terminal = terminal;
 		}
@@ -291,10 +314,13 @@ namespace ScriptRemote.Wpf
 
 		public void ChangeSize(int cols, int rows)
 		{
-			if (cols != terminal.Size.Col || rows != terminal.Size.Row)
-			{
-				terminal.Size = new Point(cols, rows);
-				//stream.Channel.SendWindowChangeRequest((uint) cols, (uint) rows, 0, 0);
+			if(terminal != null)
+            {
+				if (cols != terminal.Size.Col || rows != terminal.Size.Row)
+				{
+					terminal.Size = new Point(cols, rows);
+					//stream.Channel.SendWindowChangeRequest((uint) cols, (uint) rows, 0, 0);
+				}
 			}
 		}
 	}

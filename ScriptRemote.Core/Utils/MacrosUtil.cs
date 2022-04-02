@@ -27,16 +27,18 @@ namespace ScriptRemote.Core.Utils
 		/// <summary>
 		/// 列表
 		/// </summary>
+		/// <param name="settingId"></param>
 		/// <returns></returns>
-		public static List<SettingMacros> List()
+		public static List<SettingMacros> List(long settingId)
 		{
-			return SqliteUtil.QueryData<SettingMacros>("SELECT * FROM macros");
+			string sql = "SELECT * FROM macros WHERE SettingId=" + settingId;
+			return SqliteUtil.QueryData<SettingMacros>(sql);
 		}
 
 		/// <summary>
 		/// 保存信息
 		/// </summary>
-		public static void OnSave(SettingMacros macro)
+		public static long OnSave(SettingMacros macro)
 		{
 			Dictionary<string, object> dic = new Dictionary<string, object>();
 			dic.Add("SettingId", macro.SettingId);
@@ -48,7 +50,34 @@ namespace ScriptRemote.Core.Utils
 								VALUES
 								(@SettingId,@Pattern,@Command)";
 
-			SqliteUtil.UpdateData(insertSql.Replace("\t", ""), dic);
+			// 添加select last_insert_rowid()
+			insertSql = insertSql.Replace("\t", "") + ";select last_insert_rowid() from macros;";
+			return SqliteUtil.UpdateData(insertSql.Replace("\t", ""), dic);
+		}
+
+
+		/// <summary>
+		/// 批量存储
+		/// </summary>
+		/// <param name="settingMacros"></param>
+		/// <param name="settingId"></param>
+		public static void OnSaveList(List<SettingMacros> settingMacros, long settingId)
+		{
+			foreach (SettingMacros macro in settingMacros)
+			{
+				macro.SettingId = settingId;
+				OnSave(macro);
+			}
+		}
+
+		/// <summary>
+		/// 按settingId删除
+		/// </summary>
+		/// <param name="settingId"></param>
+		public static void OnDeleteBySettingId(long settingId)
+		{
+			string deleteSql = "DELETE FROM macros WHERE SettingId=" + settingId;
+			SqliteUtil.UpdateData(deleteSql);
 		}
 
 		/// <summary>

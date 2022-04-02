@@ -50,18 +50,7 @@ namespace ScriptRemote.Wpf
 			settingsList.SelectedIndex = 0;
 			
 		}
-		private T FindVisualParent<T>(DependencyObject child)
-			where T : DependencyObject
-		{
-			var parentObject = VisualTreeHelper.GetParent(child);
-			if (parentObject == null)
-				return null;
-			T parent = parentObject as T;
-			if (parent != null)
-				return parent;
-			return FindVisualParent<T>(parentObject);
-		}
-
+		
 		private void ListBox_PreviewMouseMove(object sender, MouseEventArgs e)
 		{
 			Point point = e.GetPosition(null);
@@ -71,13 +60,14 @@ namespace ScriptRemote.Wpf
 					Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
 			{
 				var lb = sender as ListBox;
-				var lbi = FindVisualParent<ListBoxItem>(((DependencyObject)e.OriginalSource));
+				var lbi = ControlUtil.FindVisualParent<ListBoxItem>((DependencyObject)e.OriginalSource);
 				if (lbi != null)
 				{
 					DragDrop.DoDragDrop(lbi, lbi.DataContext, DragDropEffects.Move);
 				}
 			}
 		}
+
 		private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		{
 			_dragStartPoint = e.GetPosition(null);
@@ -158,9 +148,12 @@ namespace ScriptRemote.Wpf
 
 			try
 			{
+				// 执行的macro
+				settings.settingMacros = MacrosUtil.List(settings.Id);
+
 				// 连接
 				Connection connection = await MakeConnectionAsync(settings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
-				terminalTab.Connect(connection.Stream, connection.Settings);
+				terminalTab.Connect(connection.Stream, settings);
 
 				// 重置大小
 				terminalTab.TerminalChangSize(tabControl.ActualWidth, tabControl.ActualHeight);

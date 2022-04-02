@@ -91,7 +91,7 @@ namespace ScriptRemote.Core.Utils
         /// <param name="sql"></param>
         /// <param name="dic"></param>
         /// <returns></returns>
-        public static int UpdateData(string sql, Dictionary<string, object> dic)
+        public static long UpdateData(string sql, Dictionary<string, object> dic)
         {
             SQLiteCommand cmd = new SQLiteCommand();
             cmd.Connection = getConnect();
@@ -112,7 +112,17 @@ namespace ScriptRemote.Core.Utils
                 }
             }
 
-            return cmd.ExecuteNonQuery();
+            int rows = 0;
+            // sql末尾需要追加";select last_insert_rowid();" 返回id
+            if (sql.ToLower().IndexOf("insert") != -1 && sql.ToLower().IndexOf("last_insert_rowid") != -1)
+            {
+                rows = Convert.ToInt32(cmd.ExecuteScalar());
+            }
+            else
+            {
+                rows = cmd.ExecuteNonQuery();
+            }
+            return rows;
         }
 
         /// <summary>

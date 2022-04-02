@@ -22,5 +22,11 @@ namespace ScriptRemote.Core.Common
 
         public string Command
         { get; set; }
+
+        /// <summary>
+		/// 是否执行完成，不保存到数据库
+		/// </summary>
+		public bool exec
+        { get; set; } = true;
     }
 }

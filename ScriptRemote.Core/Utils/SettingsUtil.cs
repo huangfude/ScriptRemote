@@ -65,7 +65,7 @@ namespace ScriptRemote.Core.Utils
 		/// <summary>
 		/// 保存信息
 		/// </summary>
-		public static void OnSave(ConnectionSettings settings)
+		public static long OnSave(ConnectionSettings settings)
 		{
 			Dictionary<string, object> dic = new Dictionary<string, object>();
 			dic.Add("ConnectName", settings.ConnectName);
@@ -83,8 +83,9 @@ namespace ScriptRemote.Core.Utils
 								VALUES
 								(@ConnectName,@ServerAddress,@ServerPort,@Username,@Password,@KeyFilePath,@KeyFilePassphrase,@Sort)";
 
-			SqliteUtil.UpdateData(insertSql.Replace("\t", ""), dic);
-
+			// 添加select last_insert_rowid()
+			insertSql = insertSql.Replace("\t", "") + ";select last_insert_rowid() from settings;";
+			return SqliteUtil.UpdateData(insertSql, dic);
 		}
 
 		/// <summary>

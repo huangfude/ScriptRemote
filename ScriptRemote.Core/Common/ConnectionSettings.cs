@@ -34,6 +34,12 @@ namespace ScriptRemote.Core.Common
 
 		public long Sort
 		{ get; set; }
+
+		/// <summary>
+		/// 关联的macros
+		/// </summary>
+		public List<SettingMacros> settingMacros
+		{ get; set; }
 	}
 
 

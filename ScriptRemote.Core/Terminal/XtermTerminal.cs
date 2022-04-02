@@ -124,9 +124,15 @@ namespace ScriptRemote.Core.Terminal
 			try
 			{
 				while (!reader.EndOfStream)
+                {
+					// 读取输入流
 					readChar();
+				}
 				if (state == State.Text)
+                {
 					endSequence(SequenceType.Text);
+				}
+
 			}
 			catch (Exception ex)
 			{
@@ -257,6 +263,7 @@ namespace ScriptRemote.Core.Terminal
 		XtermStreamParser parser;
 
 		TerminalFont defaultFont;
+
 		public TerminalFont DefaultFont
 		{
 			get { return defaultFont; }
@@ -281,6 +288,9 @@ namespace ScriptRemote.Core.Terminal
 		public event EventHandler<TitleChangeEventArgs> TitleChanged;
 		public event EventHandler<PrivateModeChangedEventArgs> PrivateModeChanged;
 
+		// 模仿TitleChanged，设置一个TextChanged
+		public event EventHandler<TitleChangeEventArgs> TextChanged;
+
 		public XtermTerminal(IStreamNotifier streamNotifier)
 			: base(streamNotifier)
 		{
@@ -292,6 +302,7 @@ namespace ScriptRemote.Core.Terminal
 
 			parser = new XtermStreamParser(streamNotifier);
 			parser.SequenceReceived += Parser_SequenceReceived;
+
 		}
 
 		private void Parser_SequenceReceived(object sender, SequenceReceivedEventArgs e)
@@ -302,6 +313,12 @@ namespace ScriptRemote.Core.Terminal
 				case SequenceType.Text:
 					Terminal.SetCharacters(e.Sequence, font, true, CurrentScreen == Screen);
 					System.Diagnostics.Debug.WriteLine("got: " + e.Sequence);
+					// 记录文本
+					string text = e.Sequence;
+					if (!string.IsNullOrEmpty(text) && TextChanged != null)
+                    {
+						TextChanged(this, new TitleChangeEventArgs(text));
+					}
 					break;
 
 				case SequenceType.Csi:
@@ -852,14 +869,11 @@ namespace ScriptRemote.Core.Terminal
 			switch (kind)
 			{
 				case 0:
-					// 暂时不启用变更名称
-					/*
 					if (TitleChanged != null && separatorIndex != sequence.Length)
                     {
 						string title = sequence.Substring(separatorIndex + 1);
 						TitleChanged(this, new TitleChangeEventArgs(title));
 					}
-					*/
 					break;
 
 				default:

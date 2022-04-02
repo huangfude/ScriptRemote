@@ -28,8 +28,6 @@
             <StackPanel Grid.RowSpan="3" Grid.Column="2" Margin="20">
                 <Button Content="{iconPacks:FontAwesome Kind=MinusSquareRegular}" Click="macroMinus_Click"/>
             </StackPanel>
-
-            <TextBox x:Name="id" Visibility="Hidden" />
         </Grid>
     </Grid>
 </UserControl>

@@ -80,6 +80,11 @@ namespace ScriptRemote.Wpf
 				width = tabControl.ActualWidth;
 				height = tabControl.ActualHeight;
 				
+				if(width == ActualWidth && height == ActualHeight)
+                {
+					return;
+                }
+
 				// 控件大小
 				Width = width;
 				Height = height;
