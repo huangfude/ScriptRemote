@@ -12,11 +12,11 @@ namespace ScriptRemote.Core.Common
     /// </summary>
     public class CommonConst
     {
-        // 配置文件
-        public const string configPath = "connect.cfg";
 
         public const int DefaultTerminalCols = 160;
         public const int DefaultTerminalRows = 40;
+
+        public const string ThemeName = "theme";
 
     }
 

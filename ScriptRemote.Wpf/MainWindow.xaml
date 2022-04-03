@@ -34,7 +34,7 @@
                 <MenuItem Header="_Exit" Click="MenuItem_Click_Exit" />
             </MenuItem>
             <MenuItem Header="_Tools">
-                <MenuItem Header="_Options" />
+                <MenuItem Header="_Options" Click="MenuItem_Click_Option" />
             </MenuItem>
         </Menu>
 
@@ -44,7 +44,7 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Margin="10" >
+            <StackPanel Grid.Column="0" Margin="10">
                 <!--
                 <TextBlock Margin="5"
                            FontSize="14"
@@ -64,7 +64,8 @@
                 </ListBox>
             </StackPanel>
 
-            <TabControl x:Name="tabControl" Grid.Column="1" Margin="0 10 0 0" TabStripPlacement="Top">
+            <mah:MetroTabControl x:Name="tabControl" Grid.Column="1" 
+                        TabStripPlacement="Top" mah:TabControlHelper.Underlined="TabPanel" Margin="10,0,10,0">
                 <!--
                 <TabItem Header="terminal">
                     <term:TerminalControl x:Name="terminalControl" FontFamily="Consolas" Focusable="True" FocusVisualStyle="{x:Null}" 
@@ -73,7 +74,7 @@
                     </term:TerminalControl>
                 </TabItem>
                 -->
-            </TabControl>
+            </mah:MetroTabControl>
         </Grid>
 
     </DockPanel>

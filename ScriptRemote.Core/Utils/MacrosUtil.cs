@@ -52,7 +52,7 @@ namespace ScriptRemote.Core.Utils
 
 			// 添加select last_insert_rowid()
 			insertSql = insertSql.Replace("\t", "") + ";select last_insert_rowid() from macros;";
-			return SqliteUtil.UpdateData(insertSql.Replace("\t", ""), dic);
+			return SqliteUtil.UpdateData(insertSql, dic);
 		}
 
 

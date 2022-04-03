@@ -30,6 +30,7 @@ namespace ScriptRemote.Wpf
 		public TerminalTabControl()
 		{
 			InitializeComponent();
+			DataContext = this;
 
 			viewModel = new TerminalViewModel();
 			DataContext = viewModel;

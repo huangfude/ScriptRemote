@@ -104,6 +104,7 @@ namespace ScriptRemote.Wpf
 		public ConnectionDialog()
 		{
 			InitializeComponent();
+			DataContext = this;
 
 			//Loaded += (sender, e) => { MinHeight = ActualHeight; MaxHeight = ActualHeight; };
 		}
