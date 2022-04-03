@@ -23,6 +23,7 @@ namespace ScriptRemote.Wpf
         public MacroControl()
         {
             InitializeComponent();
+            DataContext = this;
         }
 
         private void macroMinus_Click(object sender, RoutedEventArgs e)

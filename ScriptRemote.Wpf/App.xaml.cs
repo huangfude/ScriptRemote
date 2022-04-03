@@ -1,4 +1,7 @@
-﻿using System;
+﻿using ControlzEx.Theming;
+using ScriptRemote.Core.Common;
+using ScriptRemote.Core.Utils;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -25,7 +28,25 @@ namespace ScriptRemote.Wpf
 
 		public App()
 		{
+			// 初始化创建settings表
+			SettingsUtil.OnCreate();
+			// 初始化创建macros表
+			MacrosUtil.OnCreate();
+			// 初始化config表
+			ConfigUtil.OnCreate();
+			ConfigUtil.OnDefault();
+
 			Dispatcher.UnhandledException += Dispatcher_UnhandledException;
+		}
+
+		protected override void OnStartup(StartupEventArgs e)
+		{
+			base.OnStartup(e);
+
+			// 获取主题配置
+			string theme = ConfigUtil.FindByName(CommonConst.ThemeName).Value;
+			// Set the application theme
+			ThemeManager.Current.ChangeTheme(this, theme);
 		}
 
 		private void Dispatcher_UnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
@@ -40,7 +61,11 @@ namespace ScriptRemote.Wpf
 			MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 
-		
+		public void ChangeTheme(string theme)
+        {
+			ThemeManager.Current.ChangeTheme(this, theme);
+			ConfigUtil.UpdateNameValue(CommonConst.ThemeName, theme);
+		}
 
 	}
 }

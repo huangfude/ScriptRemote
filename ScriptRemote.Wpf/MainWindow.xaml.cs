@@ -28,11 +28,7 @@ namespace ScriptRemote.Wpf
 		public MainWindow()
         {
             InitializeComponent();
-
-			// 初始化创建settings表
-			SettingsUtil.OnCreate();
-			// 初始化创建macros表
-			MacrosUtil.OnCreate();
+			DataContext = this;
 
 			// 读取数据
 			settingsList.ItemsSource = SettingsUtil.List();
@@ -130,7 +126,8 @@ namespace ScriptRemote.Wpf
 		private async void SelectedConnect(ConnectionSettings settings)
 		{
 			// 添加TabItem
-			TabItem tabItem = new TabItem();
+			MetroTabItem tabItem = new MetroTabItem();
+			tabItem.CloseButtonEnabled = true;
 			tabItem.Header = settings.ConnectName;
 
 			// 添加TabItem的内容
@@ -214,7 +211,20 @@ namespace ScriptRemote.Wpf
 			dialog.ShowDialog();
 		}
 
-        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+		private void MenuItem_Click_Option(object sender, RoutedEventArgs e)
+		{
+			// 添加TabItem
+			MetroTabItem tabItem = new MetroTabItem();
+			tabItem.CloseButtonEnabled = true;
+			
+			tabItem.Header = "Options";
+			tabItem.Content = new OptionControl();
+			tabItem.IsSelected = true;
+			//添加到TabControl
+			tabControl.Items.Add(tabItem);
+		}
+
+		private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
 			// 屏幕整体宽度
 			double x = SystemParameters.PrimaryScreenWidth;
