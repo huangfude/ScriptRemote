@@ -276,16 +276,18 @@ namespace ScriptRemote.Wpf
 				string text = e.Title.Trim();
 				if (!string.IsNullOrEmpty(text))
                 {
-					foreach (SettingMacros macro in settings.settingMacros)
+					for(int i = 0; i < settings.settingMacros.Count; i++)
                     {
+						SettingMacros macro = settings.settingMacros[i];
 						// 执行一次去除一个
 						string pattern = macro.Pattern;
-                        if (!string.IsNullOrEmpty(pattern) && text.IndexOf(pattern)>-1 && macro.exec)
+                        if (!string.IsNullOrEmpty(pattern) && text.IndexOf(pattern)>-1)
                         {
 							System.Diagnostics.Debug.WriteLine("command: " + macro.Command);
 							stream.WriteLine(macro.Command);
 							// 执行一次
-							macro.exec = false;
+							settings.settingMacros.RemoveAt(i);
+							break;
 						}
 					}
 					
