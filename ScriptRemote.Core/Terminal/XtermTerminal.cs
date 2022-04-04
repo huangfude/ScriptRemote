@@ -368,17 +368,17 @@ namespace ScriptRemote.Core.Terminal
 #endif*/
 		}
 
-		static int getAtOrDefault(int?[] arr, int index, int defaultValue)
+		static int getAtOrDefault(int[] arr, int index, int defaultValue)
 		{
 			if (index >= arr.Length)
 				return defaultValue;
-			return arr[index].GetValueOrDefault(defaultValue);
+			return arr[index];
 		}
 
-		bool handleCsiSgr(int?[] codes)
+		bool handleCsiSgr(int[] codes)
 		{
 			if (codes.Length == 0)
-				codes = new int?[] { 0 };
+				codes = new int[] { 0 };
 			else
 			{
 				// I don't know how these would be combined with other codes, so do them here
@@ -539,7 +539,7 @@ namespace ScriptRemote.Core.Terminal
 
 			bool isPrivate = sequence[0] == '?';
 			char kind = sequence.Last();
-			int?[] codes = null;
+			int[] codes = null;
 			try
 			{
 				string realSequence;
@@ -547,7 +547,17 @@ namespace ScriptRemote.Core.Terminal
 					realSequence = sequence.Substring(1, sequence.Length - 2);
 				else
 					realSequence = sequence.Substring(0, sequence.Length - 1);
-				codes = (from str in realSequence.Split(';') select str.Length > 0 ? (int?) int.Parse(str) : null).ToArray();
+				//codes = (from str in realSequence.Split(';') select str.Length > 0 ? (int?) int.Parse(str) : null).ToArray();
+				List<int> intList = new List<int>();
+				foreach (string str in realSequence.Split(';'))
+                {
+					string number = System.Text.RegularExpressions.Regex.Replace(str, @"[^0-9]+", "");
+					if (number.Length > 0)
+                    {
+						intList.Add(int.Parse(number));
+					}
+				}
+				codes = intList.ToArray();
 			}
 			catch (FormatException ex)
 			{

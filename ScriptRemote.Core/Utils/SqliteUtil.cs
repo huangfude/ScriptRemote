@@ -242,7 +242,10 @@ namespace ScriptRemote.Core.Utils
             cmd.CommandText = sql;
             SQLiteDataReader sr = cmd.ExecuteReader();
             sr.Read();
-            count = sr.GetInt32(0);
+            if(sr.GetValue(0) != DBNull.Value)
+            {
+                count = sr.GetInt32(0);
+            }
             sr.Close();
             return count;
         }
