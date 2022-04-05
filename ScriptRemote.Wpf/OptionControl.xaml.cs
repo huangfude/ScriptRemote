@@ -29,7 +29,7 @@ namespace ScriptRemote.Wpf
             DataContext = this;
 
             string theme = ConfigUtil.FindByName(CommonConst.ThemeName).Value;
-            if ("Light.Cyan".Equals(theme))
+            if ("Light.Blue".Equals(theme))
             {
                 lightBtn.IsChecked = true;
             }
@@ -41,12 +41,12 @@ namespace ScriptRemote.Wpf
 
         private void lightBtn_Checked(object sender, RoutedEventArgs e)
         {
-            App.Current.ChangeTheme("Light.Cyan");
+            App.Current.ChangeTheme("Light.Blue");
         }
 
         private void darkBtn_Checked(object sender, RoutedEventArgs e)
         {
-            App.Current.ChangeTheme("Dark.Cyan");
+            App.Current.ChangeTheme("Dark.Blue");
         }
     }
 }
