@@ -407,7 +407,11 @@ namespace ScriptRemote.Core.Terminal
 				else if (sgr == 3)
 					font.Italic = true;
 				else if (sgr == 4)
-					font.Underline = true;
+                {
+					// 暂时不加下划线
+					//font.Underline = true;
+					font.Underline = false;
+				}
 				else if (sgr == 7)
 					font.Inverse = true;
 				else if (sgr == 8)
