@@ -145,15 +145,20 @@ namespace ScriptRemote.Wpf
 
 			try
 			{
+
+				double tabWidth = tabControl.ActualWidth;
+				double tabHeight = tabControl.ActualHeight;
+				var t = terminalTab.GetColsAndRows(tabWidth, tabHeight);
+
 				// 执行的macro
 				settings.settingMacros = MacrosUtil.List(settings.Id);
 
 				// 连接
-				Connection connection = await MakeConnectionAsync(settings, CommonConst.DefaultTerminalCols, CommonConst.DefaultTerminalRows);
+				Connection connection = await MakeConnectionAsync(settings, t.cols, t.rows);
 				terminalTab.Connect(connection.Stream, settings);
 
 				// 重置大小
-				terminalTab.TerminalChangSize(tabControl.ActualWidth, tabControl.ActualHeight);
+				terminalTab.TerminalChangSize(tabWidth, tabHeight);
 				tabItem.Focus();
 
 			}
