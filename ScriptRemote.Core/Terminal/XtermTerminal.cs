@@ -960,8 +960,8 @@ namespace ScriptRemote.Core.Terminal
 			else
 			{
 				int newRow = CursorPos.Row + 1;
-				// 提前触发scroll
-				if (newRow >= actualBottom - 3)
+				// 触发scroll
+				if (newRow >= actualBottom)
 				{
 					MoveLines(actualTop + 1, actualTop, actualBottom - actualTop - 1);
 				}

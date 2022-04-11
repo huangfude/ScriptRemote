@@ -94,18 +94,22 @@ namespace ScriptRemote.Wpf
 			TerminalChangSize(width, height);
 		}
 
-		public void TerminalChangSize(double width, double height)
+		public (int cols, int rows) GetColsAndRows(double width, double height)
         {
 			//var transformer = PresentationSource.FromVisual(terminalControl).CompositionTarget.TransformToDevice;
 			//var stops = transformer.Transform(new System.Windows.Point(terminalControl.CharWidth, terminalControl.CharHeight));
 			double horizontalStop = terminalControl.CharWidth;
 			double verticalStop = terminalControl.CharHeight;
 
+			int cols = (int)((width - SystemParameters.ScrollWidth + 1f) / horizontalStop);
+			int rows = (int)((height + 1f) / verticalStop);
+			return (cols, rows -3);
+		}
 
-			int newCols = (int)((width - SystemParameters.ScrollWidth + 1f) / horizontalStop);
-			int newRows = (int)((height + 1f) / verticalStop);
-
-			viewModel.ChangeSize(newCols, newRows);
+		public void TerminalChangSize(double width, double height)
+        {
+			var t = GetColsAndRows(width, height);
+			viewModel.ChangeSize(t.cols, t.rows);
 		}
 
 		public void OnKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
